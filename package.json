@@ -1,0 +1,23 @@
+{
+  "name": "dockdo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Self-hosted dockerized Todo app with separate admin dashboard",
+  "workspaces": [
+    "shared",
+    "app",
+    "admin"
+  ],
+  "scripts": {
+    "build": "npm run build -w @dockdo/shared && npm run build:server -w @dockdo/app && npm run build:web -w @dockdo/app && npm run build:server -w @dockdo/admin && npm run build:web -w @dockdo/admin",
+    "start:app": "npm run start -w @dockdo/app",
+    "start:admin": "npm run start -w @dockdo/admin",
+    "dev": "concurrently -k -n shared,app,admin,web-app,web-admin -c blue,green,yellow,magenta,cyan \"npm run dev -w @dockdo/shared\" \"npm run dev:server -w @dockdo/app\" \"npm run dev:server -w @dockdo/admin\" \"npm run dev:web -w @dockdo/app\" \"npm run dev:web -w @dockdo/admin\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

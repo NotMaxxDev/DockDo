@@ -1,0 +1,19 @@
+# Abhängigkeiten
+node_modules/
+
+# Build-Artefakte
+dist/
+
+# Laufzeitdaten (SQLite-DB, Backups, Themes, Logs)
+data/
+
+# Konfiguration & Secrets
+.env
+.env.local
+*.log
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

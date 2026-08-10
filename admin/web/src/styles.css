@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --c-primary: 79 70 229;
+  --c-accent: 14 165 233;
+  --c-background: 241 245 249;
+  --c-surface: 255 255 255;
+  --c-text: 15 23 42;
+  --c-muted: 100 116 139;
+  --c-border: 226 232 240;
+  --c-success: 22 163 74;
+  --c-danger: 220 38 38;
+  --c-warning: 217 119 6;
+  --f-theme: Inter, ui-sans-serif, system-ui, sans-serif;
+  --r-theme: 10px;
+}
+
+body {
+  @apply bg-bg text-ink font-theme antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--c-border));
+  border-radius: 8px;
+}
+
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-theme px-4 py-2 text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+.btn-primary {
+  @apply btn bg-primary text-white hover:opacity-90;
+}
+.btn-ghost {
+  @apply btn border border-line text-ink hover:bg-bg;
+}
+.btn-danger {
+  @apply btn bg-danger text-white hover:opacity-90;
+}
+.btn-quiet {
+  @apply btn text-muted hover:text-ink hover:bg-bg;
+}
+.card {
+  @apply rounded-theme border border-line bg-surface shadow-sm;
+}
+.input {
+  @apply w-full rounded-theme border border-line bg-surface px-3 py-2 text-sm outline-none placeholder:text-muted/70 focus:border-primary;
+}
+.label {
+  @apply mb-1 block text-xs font-semibold uppercase tracking-wide text-muted;
+}
+.table-base th {
+  @apply border-b border-line px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-muted;
+}
+.table-base td {
+  @apply border-b border-line px-3 py-2;
+}
+.chip {
+  @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium;
+}

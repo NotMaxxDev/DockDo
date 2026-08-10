@@ -1,0 +1,83 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: app/Dockerfile
+    image: dockdo-app:latest
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    environment:
+      - DB_MODE=${DB_MODE:-sqlite}
+      - DATA_DIR=/data
+      - HOST=${HOST:-0.0.0.0}
+      - PUBLIC_APP_URL=${PUBLIC_APP_URL:-http://localhost:3000}
+      - PUBLIC_ADMIN_URL=${PUBLIC_ADMIN_URL:-http://localhost:3001}
+      - COOKIE_SECRET=${COOKIE_SECRET}
+      - SESSION_TTL_DAYS=${SESSION_TTL_DAYS:-30}
+      - MARIADB_HOST=${MARIADB_HOST:-mariadb}
+      - MARIADB_PORT=${MARIADB_PORT:-3306}
+      - MARIADB_DATABASE=${MARIADB_DATABASE:-todoapp}
+      - MARIADB_USER=${MARIADB_USER:-todoapp}
+      - MARIADB_PASSWORD=${MARIADB_PASSWORD:-change-me-too}
+    volumes:
+      - ${DATA_DIR:-./data}:/data
+    depends_on:
+      - mariadb
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  admin:
+    build:
+      context: .
+      dockerfile: admin/Dockerfile
+    image: dockdo-admin:latest
+    ports:
+      - "${ADMIN_PORT:-3001}:3001"
+    environment:
+      - DB_MODE=${DB_MODE:-sqlite}
+      - DATA_DIR=/data
+      - HOST=${HOST:-0.0.0.0}
+      - PUBLIC_APP_URL=${PUBLIC_APP_URL:-http://localhost:3000}
+      - PUBLIC_ADMIN_URL=${PUBLIC_ADMIN_URL:-http://localhost:3001}
+      - COOKIE_SECRET=${COOKIE_SECRET}
+      - SESSION_TTL_DAYS=${SESSION_TTL_DAYS:-30}
+      - MARIADB_HOST=${MARIADB_HOST:-mariadb}
+      - MARIADB_PORT=${MARIADB_PORT:-3306}
+      - MARIADB_DATABASE=${MARIADB_DATABASE:-todoapp}
+      - MARIADB_USER=${MARIADB_USER:-todoapp}
+      - MARIADB_PASSWORD=${MARIADB_PASSWORD:-change-me-too}
+    volumes:
+      - ${DATA_DIR:-./data}:/data
+    depends_on:
+      - mariadb
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  mariadb:
+    image: mariadb:11
+    profiles: ["mariadb"]
+    environment:
+      - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD:-change-me}
+      - MARIADB_DATABASE=${MARIADB_DATABASE:-todoapp}
+      - MARIADB_USER=${MARIADB_USER:-todoapp}
+      - MARIADB_PASSWORD=${MARIADB_PASSWORD:-change-me-too}
+    volumes:
+      - ${DATA_DIR:-./data}/mariadb:/var/lib/mysql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
