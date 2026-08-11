@@ -19,10 +19,9 @@ COPY shared/package.json shared/
 COPY app/package.json app/
 COPY admin/package.json admin/
 RUN npm ci --omit=dev
-COPY shared shared
-COPY app app
-COPY admin admin
-RUN rm -rf app/node_modules admin/node_modules shared/node_modules
+COPY --from=builder /src/shared/dist shared/dist
+COPY --from=builder /src/admin/dist admin/dist
+COPY --from=builder /src/admin/web/dist admin/web/dist
 ENV NODE_ENV=production
 EXPOSE 3001
 CMD ["node", "admin/dist/server/index.js"]
