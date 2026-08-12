@@ -7,24 +7,17 @@ import { MainLayout } from './pages/MainLayout';
 import { BoardPage } from './pages/Board';
 import { SettingsPage } from './pages/Settings';
 import { SearchPage } from './pages/Search';
+import { LaunchScreen } from './LaunchScreen';
 
 export default function App() {
   const { meta, user, loading, bootstrapped } = useStore();
 
   if (loading) {
-    return (
-      <div className="flex h-full min-h-screen items-center justify-center bg-bg">
-        <div className="w-64 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-theme bg-gradient-to-br from-primary to-accent text-xl font-black text-white shadow-lg shadow-primary/25">
-            D
-          </div>
-          <div className="relative h-1.5 overflow-hidden rounded-full bg-line">
-            <div className="dockdo-shimmer absolute inset-y-0 w-1/3 rounded-full bg-gradient-to-r from-transparent via-primary to-transparent" />
-          </div>
-          <p className="mt-3 text-sm text-muted">Lade DockDo…</p>
-        </div>
-      </div>
-    );
+    return <LaunchScreen state="loading" message="Lade DockDo…" />;
+  }
+
+  if (!meta) {
+    return <LaunchScreen state="error" message="Server nicht erreichbar." detail="Prüfe, ob der DockDo-Server läuft." onRetry={() => window.location.reload()} />;
   }
 
   if (meta && !user && !bootstrapped) {
@@ -51,27 +44,28 @@ export default function App() {
 
 function SetupProbe() {
   const navigate = useNavigate();
-  useEffect(() => {
+  const [state, setState] = React.useState<'loading' | 'error'>('loading');
+  const check = React.useCallback(() => {
+    setState('loading');
     void (async () => {
-      const res = await fetch('/api/setup/state');
-      const state = (await res.json()) as { done: boolean };
-      if (!state.done) navigate('/setup', { replace: true });
-      else navigate('/login', { replace: true });
+      try {
+        const res = await fetch('/api/setup/state');
+        if (!res.ok) throw new Error(String(res.status));
+        const data = (await res.json()) as { done: boolean };
+        if (data.done) navigate('/login', { replace: true });
+        else navigate('/setup', { replace: true });
+      } catch {
+        setState('error');
+      }
     })();
   }, [navigate]);
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-bg">
-      <div className="w-64 text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-theme bg-gradient-to-br from-primary to-accent text-xl font-black text-white shadow-lg shadow-primary/25">
-          D
-        </div>
-        <div className="relative h-1.5 overflow-hidden rounded-full bg-line">
-          <div className="dockdo-shimmer absolute inset-y-0 w-1/3 rounded-full bg-gradient-to-r from-transparent via-primary to-transparent" />
-        </div>
-        <p className="mt-3 text-sm text-muted">Prüfe Installation…</p>
-      </div>
-    </div>
-  );
+  useEffect(() => {
+    check();
+  }, [check]);
+  if (state === 'error') {
+    return <LaunchScreen state="error" message="Prüfung fehlgeschlagen." detail="Der Server konnte nicht erreicht werden." onRetry={check} />;
+  }
+  return <LaunchScreen state="loading" message="Prüfe Installation…" />;
 }
 
 function RegisterPage() {
