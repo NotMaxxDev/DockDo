@@ -28,9 +28,6 @@ export async function api<T = unknown>(path: string, options: { method?: string;
     data = null;
   }
   if (!res.ok) {
-    if (res.status === 401 && !path.startsWith('/api/admin/login')) {
-      window.location.href = '/login';
-    }
     throw new ApiError(res.status, (data as { error?: string })?.error || `Fehler ${res.status}`);
   }
   return data as T;

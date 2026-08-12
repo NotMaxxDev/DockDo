@@ -45,8 +45,9 @@ export function LoginPage() {
     }
   };
 
-  const canLocal = meta && meta.authMode !== 'oidc';
+  const canLocal = meta ? meta.authMode !== 'oidc' : false;
   const oidcProviders = meta?.oidcProviders || [];
+  const serverOk = meta !== null;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg p-4">
@@ -95,8 +96,16 @@ export function LoginPage() {
           </form>
         )}
 
-        {!canLocal && oidcProviders.length === 0 && (
-          <div className="rounded-theme bg-warning/10 px-3 py-2 text-sm text-warning">Keine Anmeldemethode konfiguriert. Bitte kontaktiere deinen Administrator.</div>
+        {!serverOk && (
+          <div className="rounded-theme bg-danger/10 px-3 py-2 text-sm text-danger">
+            Der Server ist gerade nicht erreichbar. Bitte lade die Seite neu.
+          </div>
+        )}
+
+        {serverOk && oidcProviders.length === 0 && !canLocal && (
+          <div className="rounded-theme bg-warning/10 px-3 py-2 text-sm text-warning">
+            Keine Anmeldemethode konfiguriert. Bitte kontaktiere deinen Administrator.
+          </div>
         )}
       </div>
     </div>
