@@ -191,7 +191,17 @@ export async function publishSyncEvent(type: string, payload?: Record<string, un
 
 export async function createDefaultThemeIfMissing(): Promise<string> {
   const existing = await dbTyped().select().from(themes).limit(1);
-  if (existing.length > 0) return existing[0].id;
+  if (existing.length > 0) {
+    const t = existing[0];
+    if (t.isDefault && isUnchangedDefaultTheme(t.config as ThemeConfig)) {
+      await dbTyped()
+        .update(themes)
+        .set({ config: defaultThemeConfig(), updatedAt: nowIso() })
+        .where(eq(themes.id, t.id));
+      return t.id;
+    }
+    return t.id;
+  }
   const id = uuid();
   await dbTyped().insert(themes).values({
     id,
@@ -207,21 +217,42 @@ export async function createDefaultThemeIfMissing(): Promise<string> {
 
 export function defaultThemeConfig(): ThemeConfig {
   return {
-    primary: '#4f46e5',
-    accent: '#0ea5e9',
-    background: '#f8fafc',
-    surface: '#ffffff',
-    text: '#0f172a',
-    muted: '#64748b',
-    border: '#e2e8f0',
-    success: '#16a34a',
-    danger: '#dc2626',
-    warning: '#d97706',
+    primary: '#6366f1',
+    accent: '#38bdf8',
+    background: '#060b18',
+    surface: '#0d1526',
+    text: '#e5edf7',
+    muted: '#94a3b8',
+    border: '#1c2a44',
+    success: '#34d399',
+    danger: '#f87171',
+    warning: '#fbbf24',
     font: 'Inter',
     radius: 12,
     spacing: 1,
-    mode: 'light'
+    mode: 'dark'
   };
+}
+
+const LEGACY_LIGHT_DEFAULT: ThemeConfig = {
+  primary: '#4f46e5',
+  accent: '#0ea5e9',
+  background: '#f8fafc',
+  surface: '#ffffff',
+  text: '#0f172a',
+  muted: '#64748b',
+  border: '#e2e8f0',
+  success: '#16a34a',
+  danger: '#dc2626',
+  warning: '#d97706',
+  font: 'Inter',
+  radius: 12,
+  spacing: 1,
+  mode: 'light'
+};
+
+function isUnchangedDefaultTheme(config: ThemeConfig): boolean {
+  return JSON.stringify(config) === JSON.stringify(LEGACY_LIGHT_DEFAULT);
 }
 
 export function isAdminRole(role: string): boolean {

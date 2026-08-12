@@ -3,19 +3,20 @@
 @tailwind utilities;
 
 :root {
-  --c-primary: 79 70 229;
-  --c-accent: 14 165 233;
-  --c-background: 248 250 252;
-  --c-surface: 255 255 255;
-  --c-text: 15 23 42;
-  --c-muted: 100 116 139;
-  --c-border: 226 232 240;
-  --c-success: 22 163 74;
-  --c-danger: 220 38 38;
-  --c-warning: 217 119 6;
+  --c-primary: 99 102 241;
+  --c-accent: 56 189 248;
+  --c-background: 6 11 24;
+  --c-surface: 13 21 38;
+  --c-text: 229 237 247;
+  --c-muted: 148 163 184;
+  --c-border: 28 42 68;
+  --c-success: 52 211 153;
+  --c-danger: 248 113 113;
+  --c-warning: 251 191 36;
   --f-theme: Inter, ui-sans-serif, system-ui, sans-serif;
   --r-theme: 12px;
   --s-theme: 1px;
+  color-scheme: dark;
 }
 
 html, body, #root {

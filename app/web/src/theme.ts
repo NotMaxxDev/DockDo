@@ -50,6 +50,7 @@ export function applyTheme(config: ThemeConfig | null | undefined): void {
   root.style.setProperty('--r-theme', `${Math.max(0, Math.round(config.radius || 12))}px`);
   root.style.setProperty('--s-theme', `${config.spacing || 1}px`);
   root.style.setProperty('--tz-offset', '0');
+  root.style.colorScheme = config.mode === 'dark' ? 'dark' : 'light';
   root.classList.toggle('dark', config.mode === 'dark');
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', config.primary || '#4f46e5');
