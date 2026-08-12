@@ -8,7 +8,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import {
   loadConfig, initDatabase, createDefaultThemeIfMissing, getAuthSettings,
-  getGeneralSettings, logAppEvent, cleanupStale, setSetting
+  getGeneralSettings, logAppEvent, cleanupStale, setSetting, ensureSelfSignedCert
 } from '@dockdo/shared';
 import { registerAuthPlugin, csrfCookieName } from './plugins';
 import { registerMetaRoutes, registerSetupRoutes } from './routes/setup';
@@ -25,6 +25,7 @@ import { getSessionTokenFromCookie, findSessionByToken, verifyCsrf, csrfToken, c
 export async function main(): Promise<void> {
   const config = loadConfig();
   fs.mkdirSync(config.dataDir, { recursive: true });
+  const { keyPath, certPath } = ensureSelfSignedCert(config.dataDir);
   await initDatabase(config, 'app');
   const themeId = await createDefaultThemeIfMissing();
   if (themeId) void themeId;
@@ -32,7 +33,11 @@ export async function main(): Promise<void> {
   const app = Fastify({
     logger: false,
     trustProxy: true,
-    bodyLimit: 2 * 1024 * 1024
+    bodyLimit: 2 * 1024 * 1024,
+    https: {
+      key: fs.readFileSync(keyPath),
+      cert: fs.readFileSync(certPath)
+    }
   });
   app.config = config;
   app.source = 'app';
@@ -119,7 +124,7 @@ export async function main(): Promise<void> {
   setInterval(() => void heartbeat(app), 15000);
 
   await app.listen({ port: config.appPort, host: config.host });
-  console.log(`[app] DockDo App-Server läuft auf http://${config.host}:${config.appPort} (DB: ${config.dbMode}, Daten: ${config.dataDir})`);
+  console.log(`[app] DockDo App-Server läuft auf https://${config.host}:${config.appPort} (DB: ${config.dbMode}, Daten: ${config.dataDir})`);
 }
 
 async function heartbeat(app: FastifyInstance): Promise<void> {

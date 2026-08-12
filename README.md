@@ -39,10 +39,23 @@ Start automatisch.
 
 - Node.js ≥ 22 (getestet mit v25, benötigt für `better-sqlite3` ≥ 13)
 - npm ≥ 10 (Workspaces)
-- Für MariaDB: MariaDB-Server (empfohlen: `docker compose --profile mariadb up -d`)
+- Für MariaDB: MariaDB-Server (empfohlen: `docker compose up -d`, Service läuft immer mit)
 - Für SMB-Backups: `smbclient` im System
 
 ## Installation & Start
+
+### Docker (empfohlen)
+
+```bash
+cp .env.example .env   # COOKIE_SECRET setzen (openssl rand -hex 32)
+docker compose up -d --build
+```
+
+Danach **App** unter `https://<host>:3000` und **Admin** unter `https://<host>:3001` öffnen.
+Bei `DB_MODE=sqlite` (Standard) kann der MariaDB-Service weggelassen werden, wenn er nicht
+benötigt wird — er schadet aber nicht, wenn er mitläuft.
+
+### Lokal (npm)
 
 ```bash
 npm install
@@ -71,7 +84,7 @@ npm start -w @dockdo/app
 npm start -w @dockdo/admin
 ```
 
-Danach **App** unter `http://localhost:3000` und **Admin** unter `http://localhost:3001`
+Danach **App** unter `https://localhost:3000` und **Admin** unter `https://localhost:3001`
 öffnen. Beim ersten Start erscheint der Setup-Assistent (Admin-Konto anlegen; optional
 SQLite/MariaDB wählen). Das Admin-Portal nutzt dasselbe Admin-Konto erfolgreicher
 Anmeldungen am App-Server.
@@ -87,7 +100,17 @@ Anmeldungen am App-Server.
 | `MARIADB_*` | – | Host, Port, Datenbank, User, Passwort |
 | `COOKIE_SECRET` | dev-Default | **Unbedingt ändern!** Signierung von Sitzungs-/CSRF-Cookies |
 | `SESSION_TTL_DAYS` | `30` | Sitzungsdauer |
-| `PUBLIC_APP_URL` / `PUBLIC_ADMIN_URL` | `http://localhost:3000` / `:3001` | Öffentlich erreichbare URLs (Cookies, OIDC-Redirects, Push) |
+| `PUBLIC_APP_URL` / `PUBLIC_ADMIN_URL` | `https://localhost:3000` / `:3001` | Öffentlich erreichbare URLs (Cookies, OIDC-Redirects, Push) |
+
+## HTTPS & Zertifikate
+
+- Beide Server laufen **ausschließlich über HTTPS**. Beim ersten Start wird automatisch ein
+  **selbstsigniertes Zertifikat** erzeugt und unter `DATA_DIR/certs/` (`key.pem`, `cert.pem`)
+  abgelegt — danach wird es wiederverwendet. Das funktioniert bei jeder Installation
+  (Docker und npm) ohne zusätzliche Schritte.
+- Der Browser zeigt beim Selbstsigniert-Zertifikat eine Warnung — das ist normal und wird
+  einmalig bestätigt. Für eine saubere Lösung können eigene Zertifikate (z. B. Let's
+  Encrypt) einfach unter `DATA_DIR/certs/` als `key.pem`/`cert.pem` abgelegt werden.
 
 ## Backup & Wiederherstellung
 

@@ -9,7 +9,7 @@ import {
   loadConfig, initDatabase, createDefaultThemeIfMissing, getGeneralSettings,
   cleanupStale, setSetting, csrfToken, verifyCsrf, cookieOptions,
   getSessionTokenFromCookie, findSessionByToken, uuid, nowIso, getDb,
-  settings
+  settings, ensureSelfSignedCert
 } from '@dockdo/shared';
 import { registerAdminAuthHook, gateway } from './gateway';
 import { registerAdminAuthRoutes, adminStats } from './routes/auth';
@@ -26,10 +26,19 @@ const CSRF = 'dockdo_admin_csrf';
 export async function main(): Promise<void> {
   const config = loadConfig();
   fs.mkdirSync(config.dataDir, { recursive: true });
+  const { keyPath, certPath } = ensureSelfSignedCert(config.dataDir);
   await initDatabase(config, 'admin');
   await createDefaultThemeIfMissing();
 
-  const app = Fastify({ logger: false, trustProxy: true, bodyLimit: 4 * 1024 * 1024 });
+  const app = Fastify({
+    logger: false,
+    trustProxy: true,
+    bodyLimit: 4 * 1024 * 1024,
+    https: {
+      key: fs.readFileSync(keyPath),
+      cert: fs.readFileSync(certPath)
+    }
+  });
   app.config = config;
   app.source = 'admin';
 
@@ -111,7 +120,7 @@ export async function main(): Promise<void> {
   cleanupRestoreTmp();
 
   await app.listen({ port: config.adminPort, host: config.host });
-  console.log(`[admin] DockDo Admin-Server läuft auf http://${config.host}:${config.adminPort} (DB: ${config.dbMode})`);
+  console.log(`[admin] DockDo Admin-Server läuft auf https://${config.host}:${config.adminPort} (DB: ${config.dbMode}, Daten: ${config.dataDir})`);
 }
 
 function format(bytes: number): string {

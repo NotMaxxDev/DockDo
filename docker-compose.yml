@@ -10,8 +10,8 @@ services:
       - DB_MODE=${DB_MODE:-sqlite}
       - DATA_DIR=/data
       - HOST=${HOST:-0.0.0.0}
-      - PUBLIC_APP_URL=${PUBLIC_APP_URL:-http://localhost:3000}
-      - PUBLIC_ADMIN_URL=${PUBLIC_ADMIN_URL:-http://localhost:3001}
+      - PUBLIC_APP_URL=${PUBLIC_APP_URL:-https://localhost:3000}
+      - PUBLIC_ADMIN_URL=${PUBLIC_ADMIN_URL:-https://localhost:3001}
       - COOKIE_SECRET=${COOKIE_SECRET:-dockdo-insecure-dev-secret-change-me}
       - SESSION_TTL_DAYS=${SESSION_TTL_DAYS:-30}
       - MARIADB_HOST=${MARIADB_HOST:-mariadb}
@@ -26,7 +26,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      test: ["CMD-SHELL", "NODE_TLS_REJECT_UNAUTHORIZED=0 node -e \"fetch('https://127.0.0.1:3000/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))\""]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -43,8 +43,8 @@ services:
       - DB_MODE=${DB_MODE:-sqlite}
       - DATA_DIR=/data
       - HOST=${HOST:-0.0.0.0}
-      - PUBLIC_APP_URL=${PUBLIC_APP_URL:-http://localhost:3000}
-      - PUBLIC_ADMIN_URL=${PUBLIC_ADMIN_URL:-http://localhost:3001}
+      - PUBLIC_APP_URL=${PUBLIC_APP_URL:-https://localhost:3000}
+      - PUBLIC_ADMIN_URL=${PUBLIC_ADMIN_URL:-https://localhost:3001}
       - COOKIE_SECRET=${COOKIE_SECRET:-dockdo-insecure-dev-secret-change-me}
       - SESSION_TTL_DAYS=${SESSION_TTL_DAYS:-30}
       - MARIADB_HOST=${MARIADB_HOST:-mariadb}
@@ -59,7 +59,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      test: ["CMD-SHELL", "NODE_TLS_REJECT_UNAUTHORIZED=0 node -e \"fetch('https://127.0.0.1:3001/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))\""]
       interval: 30s
       timeout: 5s
       retries: 3

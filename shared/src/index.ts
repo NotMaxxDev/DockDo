@@ -1,4 +1,5 @@
 export * from './config';
+export * from './certs';
 export * from './db-client';
 export * from './db-schema';
 export * from './settings';
