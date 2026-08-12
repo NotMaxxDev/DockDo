@@ -14,9 +14,14 @@ export default function App() {
   if (loading) {
     return (
       <div className="flex h-full min-h-screen items-center justify-center bg-bg">
-        <div className="animate-pulse text-center">
-          <div className="mx-auto mb-3 h-10 w-10 rounded-theme bg-primary/20" />
-          <div className="text-sm text-muted">Lade DockDo…</div>
+        <div className="w-64 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-theme bg-gradient-to-br from-primary to-accent text-xl font-black text-white shadow-lg shadow-primary/25">
+            D
+          </div>
+          <div className="relative h-1.5 overflow-hidden rounded-full bg-line">
+            <div className="dockdo-shimmer absolute inset-y-0 w-1/3 rounded-full bg-gradient-to-r from-transparent via-primary to-transparent" />
+          </div>
+          <p className="mt-3 text-sm text-muted">Lade DockDo…</p>
         </div>
       </div>
     );
@@ -54,7 +59,19 @@ function SetupProbe() {
       else navigate('/login', { replace: true });
     })();
   }, [navigate]);
-  return <div className="flex min-h-screen items-center justify-center bg-bg text-muted">Prüfe Installation…</div>;
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-bg">
+      <div className="w-64 text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-theme bg-gradient-to-br from-primary to-accent text-xl font-black text-white shadow-lg shadow-primary/25">
+          D
+        </div>
+        <div className="relative h-1.5 overflow-hidden rounded-full bg-line">
+          <div className="dockdo-shimmer absolute inset-y-0 w-1/3 rounded-full bg-gradient-to-r from-transparent via-primary to-transparent" />
+        </div>
+        <p className="mt-3 text-sm text-muted">Prüfe Installation…</p>
+      </div>
+    </div>
+  );
 }
 
 function RegisterPage() {
