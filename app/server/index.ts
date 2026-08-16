@@ -7,7 +7,7 @@ import websocket from '@fastify/websocket';
 import * as path from 'path';
 import * as fs from 'fs';
 import {
-  loadConfig, initDatabase, createDefaultThemeIfMissing, getAuthSettings,
+  loadConfig, initDatabase, createDefaultThemeIfMissing, seedPresetThemes, getAuthSettings,
   getGeneralSettings, logAppEvent, cleanupStale, setSetting, ensureSelfSignedCert
 } from '@dockdo/shared';
 import { registerAuthPlugin, csrfCookieName } from './plugins';
@@ -29,6 +29,7 @@ export async function main(): Promise<void> {
   await initDatabase(config, 'app');
   const themeId = await createDefaultThemeIfMissing();
   if (themeId) void themeId;
+  await seedPresetThemes();
 
   const app = Fastify({
     logger: false,

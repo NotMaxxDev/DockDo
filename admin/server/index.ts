@@ -6,7 +6,7 @@ import fastifyStatic from '@fastify/static';
 import * as path from 'path';
 import * as fs from 'fs';
 import {
-  loadConfig, initDatabase, createDefaultThemeIfMissing, getGeneralSettings,
+  loadConfig, initDatabase, createDefaultThemeIfMissing, seedPresetThemes, getGeneralSettings,
   cleanupStale, setSetting, csrfToken, verifyCsrf, cookieOptions,
   getSessionTokenFromCookie, findSessionByToken, uuid, nowIso, getDb,
   settings, ensureSelfSignedCert
@@ -29,6 +29,7 @@ export async function main(): Promise<void> {
   const { keyPath, certPath } = ensureSelfSignedCert(config.dataDir);
   await initDatabase(config, 'admin');
   await createDefaultThemeIfMissing();
+  await seedPresetThemes();
 
   const app = Fastify({
     logger: false,

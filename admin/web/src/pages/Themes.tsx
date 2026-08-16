@@ -21,8 +21,62 @@ const DEFAULT_CONFIG: ThemeConfig = {
   font: 'Inter', radius: 12, spacing: 1, mode: 'light'
 };
 
-function toVars(c: ThemeConfig): string {
-  return `--c-primary:${c.primary};--c-accent:${c.accent};--c-background:${c.background};--c-surface:${c.surface};--c-text:${c.text};--c-muted:${c.muted};--c-border:${c.border};--c-ok:${c.success};--c-danger:${c.danger};--c-warning:${c.warning};--font-sans:${c.font};--radius:${c.radius}px;`;
+function toVars(c: ThemeConfig): Record<string, string> {
+  return {
+    '--c-primary': c.primary, '--c-accent': c.accent, '--c-background': c.background, '--c-surface': c.surface,
+    '--c-text': c.text, '--c-muted': c.muted, '--c-border': c.border, '--c-ok': c.success, '--c-success': c.success,
+    '--c-danger': c.danger, '--c-warning': c.warning, '--radius': `${c.radius}px`
+  };
+}
+
+function ThemePreview({ cfg }: { cfg: ThemeConfig }) {
+  const vars = toVars(cfg) as React.CSSProperties;
+  return (
+    <div
+      className="overflow-hidden rounded-xl border"
+      style={{ ...vars, fontFamily: cfg.font, background: 'var(--c-background)', color: 'var(--c-text)', borderColor: 'var(--c-border)' }}
+    >
+      <div className="flex">
+        <div className="hidden w-16 shrink-0 flex-col gap-1.5 p-2 sm:flex" style={{ background: 'var(--c-surface)', borderRight: '1px solid var(--c-border)' }}>
+          <div className="mb-1 flex h-5 w-5 items-center justify-center rounded text-[10px] font-bold text-white" style={{ background: 'var(--c-primary)' }}>D</div>
+          <div className="h-2 w-10 rounded-full" style={{ background: 'var(--c-primary)', opacity: 0.8 }} />
+          <div className="h-2 w-8 rounded-full" style={{ background: 'var(--c-border)' }} />
+          <div className="h-2 w-9 rounded-full" style={{ background: 'var(--c-border)' }} />
+        </div>
+        <div className="min-w-0 flex-1 space-y-2 p-3">
+          <div className="flex items-center justify-between gap-2">
+            <div className="truncate text-[11px] font-bold">{cfg.mode === 'dark' ? 'Dunkles Theme' : 'Helles Theme'}</div>
+            <div className="flex shrink-0 gap-1">
+              <span className="rounded px-2 py-0.5 text-[9px] font-semibold text-white" style={{ background: 'var(--c-primary)' }}>Anmelden</span>
+              <span className="rounded border px-2 py-0.5 text-[9px]" style={{ borderColor: 'var(--c-border)', color: 'var(--c-muted)' }}>Abbrechen</span>
+            </div>
+          </div>
+          <div className="rounded-lg p-2" style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border)' }}>
+            <div className="mb-1 text-[9px]" style={{ color: 'var(--c-muted)' }}>Montag, 10. Aug</div>
+            <div className="mb-1.5 flex items-center gap-1.5 text-[11px]">
+              <span className="h-3 w-3 shrink-0 rounded" style={{ background: 'var(--c-primary)', opacity: 0.9 }} />
+              <span className="truncate">Einkauf erledigen</span>
+            </div>
+            <div className="mb-2 h-1.5 overflow-hidden rounded-full" style={{ background: 'var(--c-border)' }}>
+              <div className="h-full w-2/3 rounded-full" style={{ background: 'var(--c-primary)' }} />
+            </div>
+            <div className="flex flex-wrap gap-1">
+              <span className="rounded px-1.5 py-0.5 text-[8px] font-semibold text-white" style={{ background: 'var(--c-accent)' }}>Privat</span>
+              <span className="rounded px-1.5 py-0.5 text-[8px] font-semibold text-white" style={{ background: 'var(--c-warning)' }}>Warten</span>
+              <span className="rounded px-1.5 py-0.5 text-[8px] font-semibold text-white" style={{ background: 'var(--c-ok)' }}>Fertig</span>
+            </div>
+          </div>
+          <div className="flex gap-1.5">
+            <div className="min-w-0 flex-1 rounded border px-2 py-1 text-[9px]" style={{ borderColor: 'var(--c-border)', background: 'var(--c-surface)', color: 'var(--c-muted)' }}>E-Mail-Adresse</div>
+            <div className="shrink-0 rounded px-2.5 py-1 text-[9px] font-semibold text-white" style={{ background: 'var(--c-primary)' }}>Suchen</div>
+          </div>
+          <div className="flex items-center gap-1.5 text-[9px]" style={{ color: 'var(--c-danger)' }}>
+            <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--c-danger)' }} /> 2 überfällig
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function ThemesPage() {
@@ -215,30 +269,7 @@ function ThemeEditor({ theme, onSave, onClose }: {
         </div>
         <div>
           <label className="label">Live-Vorschau</label>
-          <div className="overflow-hidden rounded-theme border-2 border-line transition-colors" style={{ fontFamily: cfg.font, ['--c-primary' as never]: cfg.primary, ['--c-accent' as never]: cfg.accent, ['--c-background' as never]: cfg.background, ['--c-surface' as never]: cfg.surface, ['--c-text' as never]: cfg.text, ['--c-muted' as never]: cfg.muted, ['--c-border' as never]: cfg.border, ['--c-ok' as never]: cfg.success, ['--c-danger' as never]: cfg.danger, ['--c-warning' as never]: cfg.warning, ['--radius' as never]: `${cfg.radius}px`, background: 'var(--c-background)' }}>
-            <style>{`:root{${toVars(cfg)}}`}</style>
-            <div className="space-y-3 p-4" style={{ background: 'var(--c-background)', color: 'var(--c-text)' }}>
-              <div className="flex items-center justify-between">
-                <div className="text-sm" style={{ fontFamily: cfg.font }}>Deine Aufgaben</div>
-                <div className="flex gap-1.5">
-                  <span className="rounded" style={{ background: 'var(--c-primary)', color: '#fff', padding: '3px 8px', fontSize: 11 }}>Öffnen</span>
-                  <span className="rounded border" style={{ borderColor: 'var(--c-border)', color: 'var(--c-muted)', padding: '3px 8px', fontSize: 11 }}>Abbrechen</span>
-                </div>
-              </div>
-              <div className="rounded" style={{ background: 'var(--c-surface)', border: `1px solid var(--c-border)`, padding: 12 }}>
-                <div className="mb-1 text-xs" style={{ color: 'var(--c-muted)' }}>Montag, 10. Aug</div>
-                <div className="mb-2 text-sm">Einkauf erledigen</div>
-                <div className="flex flex-wrap gap-1.5">
-                  <span className="rounded" style={{ background: 'var(--c-accent)', color: '#fff', padding: '2px 7px', fontSize: 10 }}>Privat</span>
-                  <span className="rounded" style={{ background: 'var(--c-warning)', color: '#fff', padding: '2px 7px', fontSize: 10 }}>Warten</span>
-                  <span className="rounded" style={{ background: 'var(--c-ok)', color: '#fff', padding: '2px 7px', fontSize: 10 }}>Fertig</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--c-danger)' }}>
-                <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--c-danger)' }} /> 2 überfällig
-              </div>
-            </div>
-          </div>
+          <ThemePreview cfg={cfg} />
           <div className="mt-3 flex items-center gap-2 text-xs text-muted">
             <RefreshCw className="h-3 w-3" /> Änderungen wirken sofort – nach dem Speichern sehen alle Nutzer das aktualisierte Theme.
           </div>
