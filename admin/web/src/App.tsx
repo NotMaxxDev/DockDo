@@ -83,7 +83,7 @@ export default function App() {
           <div className="flex min-h-screen bg-bg">
             <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-line bg-surface lg:flex">
               <div className="flex items-center gap-2 px-5 py-5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-theme bg-primary text-base font-bold text-white">D</div>
+                <img src="/icon.svg" alt="DockDo Admin" className="h-9 w-9" />
                 <div>
                   <div className="font-bold leading-tight">{appName}</div>
                   <div className="text-[10px] uppercase tracking-wide text-muted">Admin-Panel</div>
@@ -124,7 +124,7 @@ export default function App() {
 
             <div className="flex-1 lg:pl-60">
               <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-line bg-surface/90 px-5 py-3 backdrop-blur lg:hidden">
-                <div className="flex h-8 w-8 items-center justify-center rounded-theme bg-primary text-sm font-bold text-white">D</div>
+                <img src="/icon.svg" alt="DockDo Admin" className="h-8 w-8" />
                 <span className="font-bold">{appName}</span>
                 <div className="ml-auto flex gap-1 overflow-x-auto">
                   {nav.map((n) => (
@@ -207,7 +207,7 @@ function Login({ onSuccess, appName }: { onSuccess: () => Promise<void>; appName
     >
       <div className="login-overlay" />
       <div className="login-card">
-        <div className="login-logo">D</div>
+        <img src="/icon.svg" alt="" className="login-logo" />
         <h1 className="login-title">{appName}</h1>
         {!totpToken && (
           <form onSubmit={submit}>
