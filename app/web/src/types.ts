@@ -22,6 +22,7 @@ export interface ListDto {
   name: string;
   icon: string | null;
   color: string | null;
+  type: string | null;
   ownerId: string;
   memberRole: 'owner' | 'editor' | 'viewer';
   createdAt: string;

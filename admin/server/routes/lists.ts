@@ -8,7 +8,7 @@ import { requireAdmin } from '../gateway';
 
 function pubList(l: any, counts: Map<string, number>) {
   return {
-    id: l.id, name: l.name, icon: l.icon, color: l.color, ownerId: l.ownerId, createdAt: l.createdAt,
+    id: l.id, name: l.name, icon: l.icon, color: l.color, type: l.type, ownerId: l.ownerId, createdAt: l.createdAt,
     updatedAt: l.updatedAt, taskCount: counts.get(l.id) || 0
   };
 }
@@ -24,6 +24,51 @@ export function registerAdminListRoutes(app: FastifyInstance): void {
     let out = all.map((l) => pubList(l, counts));
     if (q.search) out = out.filter((l) => l.name.toLowerCase().includes(String(q.search).toLowerCase()));
     return out;
+  });
+
+  app.post('/api/admin/lists', async (req, reply) => {
+    if (!requireAdmin(req, reply)) return;
+    const { name, type, color, icon, members } = req.body as {
+      name?: string; type?: string; color?: string; icon?: string;
+      members?: { userId: string; role?: 'viewer' | 'editor' }[];
+    };
+    if (!name || !name.trim()) return reply.status(400).send({ error: 'Name erforderlich.' });
+    const id = uuid();
+    const ts = nowIso();
+    const safeType = ['todo', 'shopping', 'ideas', 'notes', 'projects'].includes(type || '') ? type : 'todo';
+    await getDb().insert(lists).values({
+      id, name: name.trim(), icon: icon || null, color: color || null, type: safeType,
+      ownerId: req.user!.id, createdAt: ts, updatedAt: ts
+    });
+    await getDb().insert(listMembers).values({ listId: id, userId: req.user!.id, role: 'owner', createdAt: ts });
+    const assigned: string[] = [];
+    for (const m of members || []) {
+      if (!m?.userId || m.userId === req.user!.id) continue;
+      const safeRole = (m.role === 'editor' ? 'editor' : 'viewer') as 'viewer' | 'editor';
+      await getDb()
+        .insert(listMembers)
+        .values({ listId: id, userId: m.userId, role: safeRole, createdAt: ts })
+        .onConflictDoUpdate({ target: [listMembers.listId, listMembers.userId], set: { role: safeRole } });
+      assigned.push(m.userId);
+    }
+    await publishSyncEvent('list:created', { listId: id, actorId: req.user!.id, members: assigned });
+    await audit(req.user!, 'admin:list-created', 'list', id, { name: name.trim(), type: safeType, members: assigned }, req.clientIp);
+    return { id, name: name.trim(), icon: icon || null, color: color || null, type: safeType, ownerId: req.user!.id, createdAt: ts, updatedAt: ts };
+  });
+
+  app.patch('/api/admin/lists/:id', async (req, reply) => {
+    if (!requireAdmin(req, reply)) return;
+    const { id } = req.params as { id: string };
+    const { name, type, color, icon } = req.body as { name?: string; type?: string; color?: string; icon?: string };
+    const update: Record<string, unknown> = { updatedAt: nowIso() };
+    if (name !== undefined && name.trim()) update.name = name.trim();
+    if (type !== undefined) update.type = ['todo', 'shopping', 'ideas', 'notes', 'projects'].includes(type) ? type : 'todo';
+    if (color !== undefined) update.color = color;
+    if (icon !== undefined) update.icon = icon;
+    await getDb().update(lists).set(update).where(eq(lists.id, id));
+    await publishSyncEvent('list:updated', { listId: id, actorId: req.user!.id, changes: update });
+    await audit(req.user!, 'admin:list-updated', 'list', id, { changes: update }, req.clientIp);
+    return { ok: true };
   });
 
   app.get('/api/admin/lists/:id', async (req, reply) => {

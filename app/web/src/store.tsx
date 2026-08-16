@@ -22,7 +22,6 @@ interface StoreState {
   refreshMe: () => Promise<void>;
   refreshLists: () => Promise<void>;
   refreshTasks: (listId: string) => Promise<void>;
-  createList: (name: string, icon?: string, color?: string) => Promise<ListDto>;
   updateList: (id: string, patch: Partial<ListDto>) => Promise<void>;
   deleteList: (id: string) => Promise<void>;
   createTask: (listId: string, data: Partial<TaskDto>) => Promise<TaskDto>;
@@ -197,13 +196,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     window.location.href = '/login';
   }, []);
 
-  const createList = useCallback(async (name: string, icon?: string, color?: string) => {
-    const row = await api<ListDto>('/api/lists', { method: 'POST', body: { name, icon, color } });
-    setLists((prev) => [...prev, row]);
-    wsClient.subscribe(row.id);
-    return row;
-  }, []);
-
   const updateList = useCallback(async (id: string, patch: Partial<ListDto>) => {
     await api(`/api/lists/${id}`, { method: 'PATCH', body: patch });
     setLists((prev) => prev.map((l) => (l.id === id ? { ...l, ...patch } : l)));
@@ -268,11 +260,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<StoreState>(() => ({
     meta, user, csrf, lists, tasksByList, activeListId, presence, online, loading, bootstrapped,
     login, completeTotp, logout, refreshMe, refreshLists, refreshTasks,
-    createList, updateList, deleteList, createTask, updateTask, deleteTask, reorderTasks,
+    updateList, deleteList, createTask, updateTask, deleteTask, reorderTasks,
     setActiveList: setActiveListId, selectTheme, updateUserLocally
   }), [meta, user, csrf, lists, tasksByList, activeListId, presence, online, loading, bootstrapped,
     login, completeTotp, logout, refreshMe, refreshLists, refreshTasks,
-    createList, updateList, deleteList, createTask, updateTask, deleteTask, reorderTasks, selectTheme, updateUserLocally]);
+    updateList, deleteList, createTask, updateTask, deleteTask, reorderTasks, selectTheme, updateUserLocally]);
 
   useEffect(() => {
     if (!navigator.serviceWorker) return;

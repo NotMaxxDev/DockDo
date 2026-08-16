@@ -4,7 +4,7 @@ const SQLITE_DDL: string[] = [
   `CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE, name TEXT NOT NULL, password_hash TEXT, role TEXT NOT NULL DEFAULT 'user', status TEXT NOT NULL DEFAULT 'invited', locale TEXT NOT NULL DEFAULT 'de', timezone TEXT NOT NULL DEFAULT 'UTC', theme_id TEXT, notif TEXT NOT NULL DEFAULT '{}', oidc_subject TEXT, oidc_provider TEXT, totp_secret TEXT, totp_enabled INTEGER NOT NULL DEFAULT 0, failed_attempts INTEGER NOT NULL DEFAULT 0, locked_until TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, last_login_at TEXT)`,
   `CREATE TABLE IF NOT EXISTS sessions (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, token_hash TEXT NOT NULL UNIQUE, ip TEXT, user_agent TEXT, expires_at TEXT NOT NULL, last_seen_at TEXT NOT NULL, created_at TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS invites (id TEXT PRIMARY KEY, email TEXT NOT NULL, token_hash TEXT NOT NULL UNIQUE, role TEXT NOT NULL DEFAULT 'user', created_by TEXT, created_at TEXT NOT NULL, expires_at TEXT NOT NULL, used_at TEXT)`,
-  `CREATE TABLE IF NOT EXISTS lists (id TEXT PRIMARY KEY, name TEXT NOT NULL, icon TEXT, color TEXT, owner_id TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)`,
+  `CREATE TABLE IF NOT EXISTS lists (id TEXT PRIMARY KEY, name TEXT NOT NULL, icon TEXT, color TEXT, type TEXT NOT NULL DEFAULT 'todo', owner_id TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS list_members (list_id TEXT NOT NULL, user_id TEXT NOT NULL, role TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY (list_id, user_id))`,
   `CREATE TABLE IF NOT EXISTS labels (id TEXT PRIMARY KEY, list_id TEXT NOT NULL, name TEXT NOT NULL, color TEXT NOT NULL DEFAULT '#64748b', created_at TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS task_labels (task_id TEXT NOT NULL, label_id TEXT NOT NULL, PRIMARY KEY (task_id, label_id))`,
@@ -36,7 +36,7 @@ const MYSQL_DDL: string[] = [
   `CREATE TABLE IF NOT EXISTS users (id VARCHAR(64) PRIMARY KEY, email VARCHAR(255) NOT NULL UNIQUE, name VARCHAR(255) NOT NULL, password_hash VARCHAR(255), role VARCHAR(16) NOT NULL DEFAULT 'user', status VARCHAR(16) NOT NULL DEFAULT 'invited', locale VARCHAR(8) NOT NULL DEFAULT 'de', timezone VARCHAR(64) NOT NULL DEFAULT 'UTC', theme_id VARCHAR(64), notif JSON NOT NULL, oidc_subject VARCHAR(255), oidc_provider VARCHAR(64), totp_secret VARCHAR(255), totp_enabled TINYINT(1) NOT NULL DEFAULT 0, failed_attempts INT NOT NULL DEFAULT 0, locked_until DATETIME(3) NULL, created_at DATETIME(3) NOT NULL, updated_at DATETIME(3) NOT NULL, last_login_at DATETIME(3) NULL)`,
   `CREATE TABLE IF NOT EXISTS sessions (id VARCHAR(64) PRIMARY KEY, user_id VARCHAR(64) NOT NULL, token_hash VARCHAR(64) NOT NULL UNIQUE, ip VARCHAR(64), user_agent VARCHAR(512), expires_at DATETIME(3) NOT NULL, last_seen_at DATETIME(3) NOT NULL, created_at DATETIME(3) NOT NULL, INDEX idx_sessions_user (user_id))`,
   `CREATE TABLE IF NOT EXISTS invites (id VARCHAR(64) PRIMARY KEY, email VARCHAR(255) NOT NULL, token_hash VARCHAR(64) NOT NULL UNIQUE, role VARCHAR(16) NOT NULL DEFAULT 'user', created_by VARCHAR(64), created_at DATETIME(3) NOT NULL, expires_at DATETIME(3) NOT NULL, used_at DATETIME(3) NULL)`,
-  `CREATE TABLE IF NOT EXISTS lists (id VARCHAR(64) PRIMARY KEY, name VARCHAR(255) NOT NULL, icon VARCHAR(64), color VARCHAR(16), owner_id VARCHAR(64) NOT NULL, created_at DATETIME(3) NOT NULL, updated_at DATETIME(3) NOT NULL)`,
+  `CREATE TABLE IF NOT EXISTS lists (id VARCHAR(64) PRIMARY KEY, name VARCHAR(255) NOT NULL, icon VARCHAR(64), color VARCHAR(16), type VARCHAR(16) NOT NULL DEFAULT 'todo', owner_id VARCHAR(64) NOT NULL, created_at DATETIME(3) NOT NULL, updated_at DATETIME(3) NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS list_members (list_id VARCHAR(64) NOT NULL, user_id VARCHAR(64) NOT NULL, role VARCHAR(16) NOT NULL, created_at DATETIME(3) NOT NULL, PRIMARY KEY (list_id, user_id))`,
   `CREATE TABLE IF NOT EXISTS labels (id VARCHAR(64) PRIMARY KEY, list_id VARCHAR(64) NOT NULL, name VARCHAR(255) NOT NULL, color VARCHAR(16) NOT NULL DEFAULT '#64748b', created_at DATETIME(3) NOT NULL, INDEX idx_labels_list (list_id))`,
   `CREATE TABLE IF NOT EXISTS task_labels (task_id VARCHAR(64) NOT NULL, label_id VARCHAR(64) NOT NULL, PRIMARY KEY (task_id, label_id))`,
@@ -60,5 +60,14 @@ export async function migrateUp(handle: DbHandle): Promise<void> {
   const ddl = handle.mode === 'sqlite' ? SQLITE_DDL : MYSQL_DDL;
   for (const statement of ddl) {
     await runRaw(handle, statement);
+  }
+  try {
+    if (handle.mode === 'sqlite') {
+      await runRaw(handle, `ALTER TABLE lists ADD COLUMN type TEXT NOT NULL DEFAULT 'todo'`);
+    } else {
+      await runRaw(handle, `ALTER TABLE lists ADD COLUMN type VARCHAR(16) NOT NULL DEFAULT 'todo'`);
+    }
+  } catch {
+    /* Spalte existiert bereits */
   }
 }

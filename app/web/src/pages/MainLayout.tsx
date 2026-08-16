@@ -1,31 +1,13 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate, NavLink } from 'react-router-dom';
-import { Plus, Settings, LogOut, Search, Menu, X } from 'lucide-react';
+import { Settings, LogOut, Search, Menu, X } from 'lucide-react';
 import { useStore } from '../store';
 
 export function MainLayout() {
-  const { lists, user, meta, presence, logout, createList, bootstrapped } = useStore();
+  const { lists, user, meta, presence, logout, bootstrapped } = useStore();
   const navigate = useNavigate();
   const [drawer, setDrawer] = useState(false);
-  const [newListMode, setNewListMode] = useState(false);
-  const [newListName, setNewListName] = useState('');
   const [search, setSearch] = useState('');
-  const [busy, setBusy] = useState(false);
-
-  const submitList = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newListName.trim()) return;
-    setBusy(true);
-    try {
-      const row = await createList(newListName.trim());
-      setNewListMode(false);
-      setNewListName('');
-      navigate(`/list/${row.id}`);
-      setDrawer(false);
-    } finally {
-      setBusy(false);
-    }
-  };
 
   const submitSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,21 +31,9 @@ export function MainLayout() {
           />
         </form>
       </div>
-      <div className="flex items-center justify-between px-4 pb-2 pt-4">
+      <div className="px-4 pb-2 pt-4">
         <span className="text-xs font-semibold uppercase tracking-wide text-muted">Listen</span>
-        <button
-          className="btn-quiet h-7 w-7 p-0"
-          onClick={() => setNewListMode((v) => !v)}
-          title="Neue Liste"
-        >
-          <Plus className="h-4 w-4" />
-        </button>
       </div>
-      {newListMode && (
-        <form onSubmit={submitList} className="px-3 pb-2">
-          <input className="input" placeholder="Listenname" value={newListName} onChange={(e) => setNewListName(e.target.value)} autoFocus />
-        </form>
-      )}
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 pb-3">
         {lists.map((l) => {
           const active = presence[l.id] || [];
@@ -82,7 +52,11 @@ export function MainLayout() {
             </NavLink>
           );
         })}
-        {lists.length === 0 && <div className="px-3 py-6 text-center text-xs text-muted">Noch keine Listen. Erstelle deine erste Liste mit dem + Button.</div>}
+        {lists.length === 0 && (
+          <div className="px-3 py-6 text-center text-xs text-muted">
+            Noch keine Listen. Ein Administrator weist dir Listen zu – sie erscheinen dann hier.
+          </div>
+        )}
       </nav>
       <div className="border-t border-line p-3">
         <NavLink to="/settings" onClick={() => setDrawer(false)} className="flex items-center gap-2 rounded-theme px-2 py-2 text-sm text-ink hover:bg-bg">

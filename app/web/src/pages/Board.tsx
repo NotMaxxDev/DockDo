@@ -8,7 +8,7 @@ import {
   SortableContext, verticalListSortingStrategy, useSortable, arrayMove
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Plus, Trash2, Calendar, Tag, Flag, ChevronDown, Search, X } from 'lucide-react';
+import { Plus, Trash2, Calendar, Tag, Flag, ChevronDown, Search } from 'lucide-react';
 import { useStore } from '../store';
 import type { TaskDto } from '../types';
 import { api } from '../api';
@@ -16,7 +16,7 @@ import { api } from '../api';
 export function BoardPage() {
   const { listId } = useParams();
   const navigate = useNavigate();
-  const { lists, tasksByList, refreshTasks, presence, user, updateTask, deleteTask, createTask, reorderTasks, setActiveList, refreshLists, deleteList } = useStore();
+  const { lists, tasksByList, refreshTasks, presence, user, updateTask, deleteTask, createTask, reorderTasks, setActiveList, deleteList } = useStore();
   const [filterOpen, setFilterOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [labelFilter, setLabelFilter] = useState('');
@@ -25,8 +25,6 @@ export function BoardPage() {
   const [selected, setSelected] = useState<TaskDto | null>(null);
   const [members, setMembers] = useState<{ userId: string; name: string; email: string; role: string }[]>([]);
   const [labels, setLabels] = useState<{ id: string; name: string; color: string }[]>([]);
-  const [shareEmail, setShareEmail] = useState('');
-  const [shareRole, setShareRole] = useState('viewer');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -167,65 +165,6 @@ export function BoardPage() {
           </div>
         </SortableContext>
       </DndContext>
-
-      {canEdit && (
-        <div className="card mt-6 p-4">
-          <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">Liste teilen</h3>
-          <form
-            className="flex flex-wrap gap-2"
-            onSubmit={async (e) => {
-              e.preventDefault();
-              if (!shareEmail) return;
-              await api(`/api/lists/${list.id}/share`, { method: 'POST', body: { email: shareEmail, role: shareRole } });
-              const d = await api<{ members: typeof members }>(`/api/lists/${list.id}`);
-              setMembers(d.members || []);
-              setShareEmail('');
-            }}
-          >
-            <input className="input flex-1" type="email" placeholder="E-Mail des Benutzers" value={shareEmail} onChange={(e) => setShareEmail(e.target.value)} />
-            <select className="input w-32" value={shareRole} onChange={(e) => setShareRole(e.target.value as 'viewer' | 'editor' | 'owner')}>
-              <option value="viewer">Betrachter</option>
-              <option value="editor">Bearbeiter</option>
-              {list.memberRole === 'owner' && <option value="owner">Owner</option>}
-            </select>
-            <button className="btn-primary" type="submit">Teilen</button>
-          </form>
-          {members.length > 0 && (
-            <div className="mt-3 space-y-1">
-              {members.map((m) => (
-                <div key={m.userId} className="flex items-center gap-2 text-sm">
-                  <span className="flex-1">{m.name} <span className="text-muted">{m.email}</span></span>
-                  <select
-                    className="input w-32 py-1"
-                    value={m.role}
-                    disabled={list.memberRole !== 'owner' || m.userId === user?.id}
-                    onChange={async (e) => {
-                      await api(`/api/lists/${list.id}/members/${m.userId}`, { method: 'PATCH', body: { role: e.target.value } });
-                      const d = await api<{ members: typeof members }>(`/api/lists/${list.id}`);
-                      setMembers(d.members || []);
-                    }}
-                  >
-                    <option value="viewer">Betrachter</option>
-                    <option value="editor">Bearbeiter</option>
-                    <option value="owner">Owner</option>
-                  </select>
-                  {list.memberRole === 'owner' && m.userId !== user?.id && (
-                    <button
-                      className="btn-quiet h-7 w-7 p-0 !text-danger"
-                      onClick={async () => {
-                        await api(`/api/lists/${list.id}/members/${m.userId}`, { method: 'DELETE' });
-                        setMembers((prev) => prev.filter((x) => x.userId !== m.userId));
-                      }}
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
 
       {selected && (
         <TaskDetail

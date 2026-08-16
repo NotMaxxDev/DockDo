@@ -64,6 +64,7 @@ export const lists = sqliteTable('lists', {
   name: text('name').notNull(),
   icon: text('icon'),
   color: text('color'),
+  type: text('type').notNull().default('todo'),
   ownerId: text('owner_id').notNull(),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull()

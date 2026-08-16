@@ -41,3 +41,24 @@ export function stripHtml(s: string): string {
 export function validateEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 }
+
+export type ListType = 'todo' | 'shopping' | 'ideas' | 'notes' | 'projects';
+
+export interface ListTypeInfo {
+  value: ListType;
+  label: string;
+  icon: string;
+  color: string;
+}
+
+export const LIST_TYPES: ListTypeInfo[] = [
+  { value: 'todo', label: 'Aufgaben', icon: '📋', color: '#6366f1' },
+  { value: 'shopping', label: 'Einkauf', icon: '🛒', color: '#14b8a6' },
+  { value: 'ideas', label: 'Ideen', icon: '💡', color: '#f59e0b' },
+  { value: 'notes', label: 'Notizen', icon: '📝', color: '#64748b' },
+  { value: 'projects', label: 'Projekte', icon: '🚀', color: '#ec4899' }
+];
+
+export function listTypeInfo(type: string | null | undefined): ListTypeInfo {
+  return LIST_TYPES.find((t) => t.value === type) || LIST_TYPES[0];
+}
