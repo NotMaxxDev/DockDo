@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Star, Copy, Trash2, Download, Upload, Plus, RefreshCw } from 'lucide-react';
+import { Star, Copy, Trash2, Download, Upload, Plus, RefreshCw, Sparkles } from 'lucide-react';
 import { api } from '../api';
 import { Modal } from './Users';
 
@@ -7,6 +7,7 @@ export interface ThemeConfig {
   primary: string; accent: string; background: string; surface: string; text: string;
   muted: string; border: string; success: string; danger: string; warning: string;
   font: string; radius: number; spacing: number; mode: 'light' | 'dark';
+  glass: boolean;
 }
 
 interface ThemeRow {
@@ -18,7 +19,7 @@ const DEFAULT_CONFIG: ThemeConfig = {
   primary: '#4f46e5', accent: '#0ea5e9', background: '#f8fafc', surface: '#ffffff',
   text: '#0f172a', muted: '#64748b', border: '#e2e8f0',
   success: '#16a34a', danger: '#dc2626', warning: '#d97706',
-  font: 'Inter', radius: 12, spacing: 1, mode: 'light'
+  font: 'Inter', radius: 12, spacing: 1, mode: 'light', glass: false
 };
 
 function toVars(c: ThemeConfig): Record<string, string> {
@@ -31,13 +32,22 @@ function toVars(c: ThemeConfig): Record<string, string> {
 
 function ThemePreview({ cfg }: { cfg: ThemeConfig }) {
   const vars = toVars(cfg) as React.CSSProperties;
+  const g = !!cfg.glass;
+  const glass = (pct: number) => `color-mix(in srgb, ${cfg.surface} ${pct}%, transparent)`;
+  const blur: React.CSSProperties = g ? { backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)' } : {};
   return (
     <div
       className="overflow-hidden rounded-xl border"
-      style={{ ...vars, fontFamily: cfg.font, background: 'var(--c-background)', color: 'var(--c-text)', borderColor: 'var(--c-border)' }}
+      style={{
+        ...vars,
+        fontFamily: cfg.font,
+        background: g ? `linear-gradient(135deg, ${glass(55)}, ${glass(40)})` : 'var(--c-background)',
+        color: 'var(--c-text)',
+        borderColor: 'var(--c-border)'
+      }}
     >
       <div className="flex">
-        <div className="hidden w-16 shrink-0 flex-col gap-1.5 p-2 sm:flex" style={{ background: 'var(--c-surface)', borderRight: '1px solid var(--c-border)' }}>
+        <div className="hidden w-16 shrink-0 flex-col gap-1.5 p-2 sm:flex" style={{ background: g ? glass(25) : 'var(--c-surface)', borderRight: '1px solid var(--c-border)', ...blur }}>
           <div className="mb-1 flex h-5 w-5 items-center justify-center rounded text-[10px] font-bold text-white" style={{ background: 'var(--c-primary)' }}>D</div>
           <div className="h-2 w-10 rounded-full" style={{ background: 'var(--c-primary)', opacity: 0.8 }} />
           <div className="h-2 w-8 rounded-full" style={{ background: 'var(--c-border)' }} />
@@ -45,13 +55,13 @@ function ThemePreview({ cfg }: { cfg: ThemeConfig }) {
         </div>
         <div className="min-w-0 flex-1 space-y-2 p-3">
           <div className="flex items-center justify-between gap-2">
-            <div className="truncate text-[11px] font-bold">{cfg.mode === 'dark' ? 'Dunkles Theme' : 'Helles Theme'}</div>
+            <div className="truncate text-[11px] font-bold">{cfg.mode === 'dark' ? 'Dunkles Theme' : 'Helles Theme'}{g && ' · Glass'}</div>
             <div className="flex shrink-0 gap-1">
               <span className="rounded px-2 py-0.5 text-[9px] font-semibold text-white" style={{ background: 'var(--c-primary)' }}>Anmelden</span>
               <span className="rounded border px-2 py-0.5 text-[9px]" style={{ borderColor: 'var(--c-border)', color: 'var(--c-muted)' }}>Abbrechen</span>
             </div>
           </div>
-          <div className="rounded-lg p-2" style={{ background: 'var(--c-surface)', border: '1px solid var(--c-border)' }}>
+          <div className="rounded-lg p-2" style={{ background: g ? glass(30) : 'var(--c-surface)', border: '1px solid var(--c-border)', ...blur }}>
             <div className="mb-1 text-[9px]" style={{ color: 'var(--c-muted)' }}>Montag, 10. Aug</div>
             <div className="mb-1.5 flex items-center gap-1.5 text-[11px]">
               <span className="h-3 w-3 shrink-0 rounded" style={{ background: 'var(--c-primary)', opacity: 0.9 }} />
@@ -67,7 +77,7 @@ function ThemePreview({ cfg }: { cfg: ThemeConfig }) {
             </div>
           </div>
           <div className="flex gap-1.5">
-            <div className="min-w-0 flex-1 rounded border px-2 py-1 text-[9px]" style={{ borderColor: 'var(--c-border)', background: 'var(--c-surface)', color: 'var(--c-muted)' }}>E-Mail-Adresse</div>
+            <div className="min-w-0 flex-1 rounded border px-2 py-1 text-[9px]" style={{ borderColor: 'var(--c-border)', background: g ? glass(30) : 'var(--c-surface)', color: 'var(--c-muted)', ...blur }}>E-Mail-Adresse</div>
             <div className="shrink-0 rounded px-2.5 py-1 text-[9px] font-semibold text-white" style={{ background: 'var(--c-primary)' }}>Suchen</div>
           </div>
           <div className="flex items-center gap-1.5 text-[9px]" style={{ color: 'var(--c-danger)' }}>
@@ -81,7 +91,7 @@ function ThemePreview({ cfg }: { cfg: ThemeConfig }) {
 
 export function ThemesPage() {
   const [themes, setThemes] = useState<ThemeRow[]>([]);
-  const [editor, setEditor] = useState<ThemeRow | null>(null);
+  const [editor, setEditor] = useState<{ theme: ThemeRow | null } | null>(null);
 
   const load = async () => {
     const d = await api<ThemeRow[]>('/api/admin/themes');
@@ -102,6 +112,15 @@ export function ThemesPage() {
 
   const saveTheme = async (id: string, patch: { name?: string; config?: Partial<ThemeConfig>; enabled?: boolean; isDefault?: boolean }) => {
     await api(`/api/admin/themes/${id}`, { method: 'PUT', body: patch });
+    await load();
+  };
+
+  const saveEditor = async (theme: ThemeRow | null, name: string, cfg: ThemeConfig) => {
+    if (theme) {
+      await api(`/api/admin/themes/${theme.id}`, { method: 'PUT', body: { name, config: cfg } });
+    } else {
+      await api('/api/admin/themes', { method: 'POST', body: { name, config: cfg } });
+    }
     await load();
   };
 
@@ -141,10 +160,7 @@ export function ThemesPage() {
         </div>
         <div className="flex gap-2">
           <button className="btn-ghost text-xs" onClick={() => void importTheme()}><Upload className="h-3.5 w-3.5" /> Import</button>
-          <button className="btn-primary text-xs" onClick={async () => {
-            await api('/api/admin/themes', { method: 'POST', body: { name: 'Neues Theme', config: DEFAULT_CONFIG } });
-            await load();
-          }}><Plus className="h-3.5 w-3.5" /> Neues Theme</button>
+          <button className="btn-primary text-xs" onClick={() => setEditor({ theme: null })}><Plus className="h-3.5 w-3.5" /> Neues Theme</button>
         </div>
       </div>
 
@@ -157,6 +173,7 @@ export function ThemesPage() {
                 {t.name}
                 {t.isDefault && <span className="chip bg-primary/15 text-primary"><Star className="h-3 w-3" /> Standard</span>}
                 {t.config.mode === 'dark' && <span className="chip bg-line text-muted">Dark</span>}
+                {!!t.config.glass && <span className="chip bg-primary/15 text-primary"><Sparkles className="h-3 w-3" /> Glass</span>}
               </div>
               <div className="text-xs text-muted">Aktualisiert: {new Date(t.updatedAt).toLocaleString('de-DE')}</div>
             </div>
@@ -172,7 +189,7 @@ export function ThemesPage() {
             <button className="btn-quiet px-2 py-1 text-xs" onClick={() => void api(`/api/admin/themes/${t.id}/duplicate`, { method: 'POST' }).then(load)} title="Duplizieren"><Copy className="h-3.5 w-3.5" /></button>
             <button className="btn-quiet px-2 py-1 text-xs" onClick={() => exportTheme(t)} title="Exportieren"><Download className="h-3.5 w-3.5" /></button>
             <button className="btn-quiet px-2 py-1 text-xs !text-danger" onClick={() => void remove(t)} disabled={t.isDefault} title={t.isDefault ? 'Standard-Theme kann nicht gelöscht werden' : 'Löschen'}><Trash2 className="h-3.5 w-3.5" /></button>
-            <button className="btn-ghost px-3 py-1 text-xs" onClick={() => setEditor(t)}>Bearbeiten</button>
+            <button className="btn-ghost px-3 py-1 text-xs" onClick={() => setEditor({ theme: t })}>Bearbeiten</button>
           </div>
           <div className="flex flex-wrap gap-3 p-4">
             {[
@@ -186,25 +203,39 @@ export function ThemesPage() {
                 <code className="font-mono text-[10px]">{value}</code>
               </div>
             ))}
-            <div className="text-xs text-muted">Radius: {t.config.radius}px · Schrift: {t.config.font} · Modus: {t.config.mode}</div>
+            <div className="text-xs text-muted">Radius: {t.config.radius}px · Schrift: {t.config.font} · Modus: {t.config.mode}{!!t.config.glass && ' · Glas-Effekt'}</div>
           </div>
         </div>
       ))}
 
       {themes.length === 0 && <div className="card p-6 text-center text-sm text-muted">Noch keine Themes vorhanden.</div>}
 
-      {editor && <ThemeEditor theme={editor} onSave={async (patch) => { await saveTheme(editor.id, patch); setEditor(null); }} onClose={() => setEditor(null)} />}
+      {editor && (
+        <ThemeEditor
+          key={editor.theme ? editor.theme.id : 'new'}
+          theme={editor.theme}
+          onSave={async (name, cfg) => {
+            try {
+              await saveEditor(editor.theme, name, cfg);
+              setEditor(null);
+            } catch (err) {
+              throw err;
+            }
+          }}
+          onClose={() => setEditor(null)}
+        />
+      )}
     </div>
   );
 }
 
 function ThemeEditor({ theme, onSave, onClose }: {
-  theme: ThemeRow;
-  onSave: (patch: { name?: string; config?: Partial<ThemeConfig>; enabled?: boolean }) => Promise<void>;
+  theme: ThemeRow | null;
+  onSave: (name: string, config: ThemeConfig) => Promise<void>;
   onClose: () => void;
 }) {
-  const [cfg, setCfg] = useState<ThemeConfig>({ ...DEFAULT_CONFIG, ...theme.config });
-  const [name, setName] = useState(theme.name);
+  const [cfg, setCfg] = useState<ThemeConfig>({ ...DEFAULT_CONFIG, ...(theme ? theme.config : {}) });
+  const [name, setName] = useState(theme?.name || 'Neues Theme');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -214,7 +245,7 @@ function ThemeEditor({ theme, onSave, onClose }: {
     setSaving(true);
     setError('');
     try {
-      await onSave({ name, config: cfg });
+      await onSave(name.trim(), cfg);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Speichern fehlgeschlagen');
     } finally {
@@ -223,7 +254,7 @@ function ThemeEditor({ theme, onSave, onClose }: {
   };
 
   return (
-    <Modal title={`Theme bearbeiten: ${theme.name}`} onClose={onClose} wide>
+    <Modal title={theme ? `Theme bearbeiten: ${theme.name}` : 'Neues Theme erstellen'} onClose={onClose} wide>
       {error && <div className="mb-3 rounded-theme bg-danger/10 px-3 py-2 text-sm text-danger">{error}</div>}
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-3">
@@ -244,6 +275,13 @@ function ThemeEditor({ theme, onSave, onClose }: {
               <input type="number" className="input" value={cfg.radius} onChange={(e) => set('radius', Number(e.target.value))} min={0} max={32} />
             </div>
           </div>
+          <label className="flex cursor-pointer items-center gap-2 rounded-theme border border-line p-3">
+            <input type="checkbox" className="h-4 w-4" checked={!!cfg.glass} onChange={(e) => set('glass', e.target.checked)} />
+            <div>
+              <div className="text-sm font-semibold">Glas-Effekt (Glassmorphism)</div>
+              <div className="text-xs text-muted">Transluzente Flächen mit Blur über farbigem Verlauf – der „Viral"-Look</div>
+            </div>
+          </label>
           <div>
             <label className="label">Schrift</label>
             <input className="input" value={cfg.font} onChange={(e) => set('font', e.target.value)} placeholder="Inter" list="font-list" />
@@ -277,7 +315,7 @@ function ThemeEditor({ theme, onSave, onClose }: {
       </div>
       <div className="mt-4 flex justify-end gap-2">
         <button className="btn-ghost" onClick={onClose}>Abbrechen</button>
-        <button className="btn-primary" onClick={() => void save()} disabled={saving || !name.trim()}>{saving ? 'Speichern…' : 'Speichern'}</button>
+        <button className="btn-primary" onClick={() => void save()} disabled={saving || !name.trim()}>{saving ? 'Speichern…' : theme ? 'Speichern' : 'Erstellen'}</button>
       </div>
     </Modal>
   );

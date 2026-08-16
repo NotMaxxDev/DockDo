@@ -293,3 +293,33 @@ body {
     padding: 24px;
   }
 }
+
+/* Glassmorphism-Theme (config.glass) */
+.glass body {
+  background-color: rgb(var(--c-background));
+  background-image:
+    radial-gradient(1100px 550px at 8% -12%, rgb(var(--c-primary) / 0.28), transparent 60%),
+    radial-gradient(900px 500px at 108% 15%, rgb(var(--c-accent) / 0.22), transparent 55%),
+    radial-gradient(800px 600px at 50% 125%, rgb(var(--c-success) / 0.14), transparent 60%);
+  background-attachment: fixed;
+}
+.glass .bg-bg {
+  background-color: transparent;
+}
+.glass .bg-surface {
+  background-color: rgb(var(--c-surface) / 0.55);
+  backdrop-filter: blur(18px) saturate(1.5);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+}
+.glass .card {
+  background-color: rgb(var(--c-surface) / 0.5);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border-color: rgb(var(--c-border) / 0.65);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
+}
+.glass .input {
+  background-color: rgb(var(--c-surface) / 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}

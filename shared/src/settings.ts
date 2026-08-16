@@ -1,4 +1,4 @@
-import { eq, sql } from 'drizzle-orm';
+import { eq, inArray, sql } from 'drizzle-orm';
 import { settings, users, loginAttempts, auditLogs, appEvents, syncEvents, themes, type User, type Role, type ThemeConfig } from './db-schema';
 import { getDb, dbTyped } from './db-client';
 import { nowIso, uuid } from './config';
@@ -250,7 +250,8 @@ export function defaultThemeConfig(): ThemeConfig {
     font: 'Inter',
     radius: 12,
     spacing: 1,
-    mode: 'dark'
+    mode: 'dark',
+    glass: false
   };
 }
 
@@ -266,7 +267,7 @@ export const PRESET_THEMES: ThemePreset[] = [
       primary: '#6366f1', accent: '#38bdf8', background: '#060b18', surface: '#0d1526',
       text: '#e5edf7', muted: '#94a3b8', border: '#1c2a44',
       success: '#34d399', danger: '#f87171', warning: '#fbbf24',
-      font: 'Inter', radius: 12, spacing: 1, mode: 'dark'
+      font: 'Inter', radius: 12, spacing: 1, mode: 'dark', glass: false
     }
   },
   {
@@ -275,7 +276,7 @@ export const PRESET_THEMES: ThemePreset[] = [
       primary: '#4f46e5', accent: '#0ea5e9', background: '#f4f6fb', surface: '#ffffff',
       text: '#0f172a', muted: '#64748b', border: '#e2e8f0',
       success: '#16a34a', danger: '#dc2626', warning: '#d97706',
-      font: 'Inter', radius: 12, spacing: 1, mode: 'light'
+      font: 'Inter', radius: 12, spacing: 1, mode: 'light', glass: false
     }
   },
   {
@@ -284,7 +285,7 @@ export const PRESET_THEMES: ThemePreset[] = [
       primary: '#0891b2', accent: '#22d3ee', background: '#f0f9fb', surface: '#ffffff',
       text: '#164e63', muted: '#5f7d8c', border: '#c9e3ea',
       success: '#059669', danger: '#e11d48', warning: '#d97706',
-      font: 'Inter', radius: 14, spacing: 1, mode: 'light'
+      font: 'Inter', radius: 14, spacing: 1, mode: 'light', glass: false
     }
   },
   {
@@ -293,7 +294,7 @@ export const PRESET_THEMES: ThemePreset[] = [
       primary: '#a78bfa', accent: '#e879f9', background: '#0d0a1a', surface: '#161129',
       text: '#ece8f7', muted: '#9c94b8', border: '#2a2350',
       success: '#34d399', danger: '#fb7185', warning: '#fbbf24',
-      font: 'Inter', radius: 16, spacing: 1, mode: 'dark'
+      font: 'Inter', radius: 16, spacing: 1, mode: 'dark', glass: false
     }
   },
   {
@@ -302,7 +303,7 @@ export const PRESET_THEMES: ThemePreset[] = [
       primary: '#f97316', accent: '#f43f5e', background: '#150c0a', surface: '#211411',
       text: '#fdeee5', muted: '#b5968a', border: '#3a241d',
       success: '#4ade80', danger: '#fb7185', warning: '#facc15',
-      font: 'Inter', radius: 12, spacing: 1, mode: 'dark'
+      font: 'Inter', radius: 12, spacing: 1, mode: 'dark', glass: false
     }
   },
   {
@@ -311,14 +312,34 @@ export const PRESET_THEMES: ThemePreset[] = [
       primary: '#14b8a6', accent: '#2dd4bf', background: '#06120f', surface: '#0d201b',
       text: '#e2f5f0', muted: '#8fb8ae', border: '#1d4238',
       success: '#34d399', danger: '#fb7185', warning: '#fbbf24',
-      font: 'Inter', radius: 12, spacing: 1, mode: 'dark'
+      font: 'Inter', radius: 12, spacing: 1, mode: 'dark', glass: false
+    }
+  },
+  {
+    name: 'Viral Glass',
+    config: {
+      primary: '#8b5cf6', accent: '#22d3ee', background: '#0b0f1e', surface: '#141a30',
+      text: '#eef2ff', muted: '#8b95b8', border: '#2a3352',
+      success: '#34d399', danger: '#fb7185', warning: '#fbbf24',
+      font: 'Inter', radius: 18, spacing: 1, mode: 'dark', glass: true
     }
   }
 ];
 
 export async function seedPresetThemes(): Promise<void> {
-  const existing = await dbTyped().select({ name: themes.name }).from(themes);
-  const names = new Set(existing.map((t) => t.name));
+  const existing = await dbTyped().select({ id: themes.id, name: themes.name }).from(themes);
+  const byName = new Map<string, string[]>();
+  for (const t of existing) {
+    const arr = byName.get(t.name) || [];
+    arr.push(t.id);
+    byName.set(t.name, arr);
+  }
+  for (const ids of byName.values()) {
+    if (ids.length > 1) {
+      await dbTyped().delete(themes).where(inArray(themes.id, ids.slice(1)));
+    }
+  }
+  const names = new Set(byName.keys());
   for (const preset of PRESET_THEMES) {
     if (names.has(preset.name)) continue;
     await dbTyped().insert(themes).values({
@@ -347,7 +368,8 @@ const LEGACY_LIGHT_DEFAULT: ThemeConfig = {
   font: 'Inter',
   radius: 12,
   spacing: 1,
-  mode: 'light'
+  mode: 'light',
+  glass: false
 };
 
 function isUnchangedDefaultTheme(config: ThemeConfig): boolean {

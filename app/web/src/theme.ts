@@ -13,6 +13,7 @@ export interface ThemeConfig {
   radius: number;
   spacing: number;
   mode: 'light' | 'dark';
+  glass: boolean;
 }
 
 export const FONT_STACKS: Record<string, string> = {
@@ -52,6 +53,7 @@ export function applyTheme(config: ThemeConfig | null | undefined): void {
   root.style.setProperty('--tz-offset', '0');
   root.style.colorScheme = config.mode === 'dark' ? 'dark' : 'light';
   root.classList.toggle('dark', config.mode === 'dark');
+  root.classList.toggle('glass', !!config.glass);
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', config.primary || '#4f46e5');
 }

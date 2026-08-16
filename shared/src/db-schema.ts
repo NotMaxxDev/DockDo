@@ -183,6 +183,7 @@ export interface ThemeConfig {
   radius: number;
   spacing: number;
   mode: 'light' | 'dark';
+  glass: boolean;
 }
 
 export const auditLogs = sqliteTable('audit_logs', {
