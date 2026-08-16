@@ -43,10 +43,8 @@ export default function App() {
 }
 
 function SetupProbe() {
-  const navigate = useNavigate();
   const { phase, progress, remaining, status, retry } = useInstallCheck((state) => {
-    if (state.done) navigate('/login', { replace: true });
-    else navigate('/setup', { replace: true });
+    window.location.assign(state.done ? '/login' : '/setup');
   });
   if (phase === 'error') {
     return (

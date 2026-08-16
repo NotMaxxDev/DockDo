@@ -55,28 +55,28 @@ export function LaunchScreen({ state, message, detail, onRetry, progress, remain
       <Stars />
 
       <div className="relative flex w-full max-w-sm flex-col items-center text-center">
-        <div className="relative mb-7">
+        <div className="relative mb-9">
           {loading && (
             <span
-              className="dockdo-spin-slow absolute -inset-2 rounded-2xl"
+              className="dockdo-spin-slow absolute -inset-3 rounded-3xl"
               style={{
                 background: 'conic-gradient(from 0deg, transparent 0%, rgba(99,102,241,0.5) 25%, rgba(56,189,248,0.9) 50%, transparent 75%)',
-                WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px))',
-                mask: 'radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px))'
+                WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px))',
+                mask: 'radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px))'
               }}
             />
           )}
-          <div className="dockdo-rise relative flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4f46e5] to-[#38bdf8] text-2xl font-black text-white shadow-[0_0_60px_rgba(79,70,229,0.45)]">
+          <div className="dockdo-rise relative flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-[#4f46e5] to-[#38bdf8] text-4xl font-black text-white shadow-[0_0_80px_rgba(79,70,229,0.55)]">
             D
             {!loading && (
-              <span className="absolute -bottom-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-[#ef4444] text-white shadow-lg">
-                <AlertTriangle size={14} strokeWidth={3} />
+              <span className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#ef4444] text-white shadow-lg">
+                <AlertTriangle size={16} strokeWidth={3} />
               </span>
             )}
           </div>
         </div>
 
-        <p className="dockdo-rise text-base font-semibold text-slate-100" style={{ animationDelay: '0.12s' }}>
+        <p className="dockdo-rise text-lg font-semibold text-slate-100" style={{ animationDelay: '0.12s' }}>
           {message || (loading ? 'Lade DockDo…' : 'Etwas ist schiefgelaufen.')}
         </p>
         {checking && status && (
@@ -91,20 +91,23 @@ export function LaunchScreen({ state, message, detail, onRetry, progress, remain
         )}
 
         {checking && (
-          <div className="dockdo-rise mt-7 w-full" style={{ animationDelay: '0.24s' }}>
-            <div className="relative h-2.5 overflow-hidden rounded-full bg-white/10">
-              <div
-                className="relative h-full rounded-full bg-gradient-to-r from-[#6366f1] to-[#38bdf8] shadow-[0_0_16px_rgba(99,102,241,0.6)] transition-all duration-200 ease-out"
-                style={{ width: `${Math.min(100, progress || 0)}%` }}
-              />
-            </div>
-            <div className="mt-3 flex items-center justify-between text-xs">
-              <span className="font-mono font-bold tabular-nums text-slate-200">{Math.round(progress || 0)} %</span>
-              <span className="font-medium text-slate-400">
+          <div className="dockdo-rise mt-10 w-full max-w-lg" style={{ animationDelay: '0.24s' }}>
+            <div className="mb-3 flex items-end justify-between">
+              <span className="text-sm font-medium text-slate-400">
                 {remaining !== null && remaining !== undefined && remaining > 0
                   ? `Noch ca. ${Math.ceil(remaining)} Sekunde${Math.ceil(remaining) === 1 ? '' : 'n'}`
                   : 'Gleich fertig…'}
               </span>
+              <span className="bg-gradient-to-r from-[#818cf8] to-[#38bdf8] bg-clip-text text-5xl font-black tabular-nums leading-none text-transparent">
+                {Math.round(progress || 0)}%
+              </span>
+            </div>
+            <div className="relative h-4 overflow-hidden rounded-full bg-white/10 shadow-[inset_0_1px_3px_rgba(0,0,0,0.5)]">
+              <div className="dockdo-shimmer absolute inset-y-0 z-10 w-1/3 rounded-full bg-gradient-to-r from-transparent via-white/50 to-transparent" />
+              <div
+                className="relative h-full rounded-full bg-gradient-to-r from-[#6366f1] to-[#38bdf8] shadow-[0_0_28px_rgba(99,102,241,0.8)] transition-all duration-200 ease-out"
+                style={{ width: `${Math.min(100, progress || 0)}%` }}
+              />
             </div>
           </div>
         )}

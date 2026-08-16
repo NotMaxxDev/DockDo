@@ -167,7 +167,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, [lists, tasksByList, bootstrapped]);
 
   useEffect(() => {
-    if (online && !loading) void refreshLists();
+    if (online && !loading) void refreshLists().catch(() => undefined);
   }, [online, loading, refreshLists]);
 
   const login = useCallback(async (email: string, password: string) => {
