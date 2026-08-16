@@ -48,7 +48,20 @@ export async function main(): Promise<void> {
 
   await app.register(fastifyCookie);
   await app.register(fastifyHelmet, {
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
+        imgSrc: ["'self'", 'data:', 'blob:', 'https://picsum.photos'],
+        connectSrc: ["'self'", 'ws:', 'wss:'],
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        frameAncestors: ["'none'"],
+        formAction: ["'self'"]
+      }
+    },
     crossOriginEmbedderPolicy: false
   });
   await app.register(fastifyRateLimit, {
@@ -115,7 +128,23 @@ export async function main(): Promise<void> {
 
   const distDir = path.resolve(__dirname, '../../web/dist');
   if (fs.existsSync(distDir)) {
-    await app.register(fastifyStatic, { root: distDir });
+    await app.register(fastifyStatic, {
+      root: distDir,
+      setHeaders: (res, filePath) => {
+        if (filePath.endsWith('/sw.js')) {
+          res.header('Cache-Control', 'no-cache, no-store, must-revalidate');
+        } else if (filePath.endsWith('.html')) {
+          res.header('Cache-Control', 'no-cache');
+        } else if (filePath.endsWith('.webmanifest')) {
+          res.header('Content-Type', 'application/manifest+json');
+          res.header('Cache-Control', 'public, max-age=3600');
+        } else if (/\.(js|css)$/.test(filePath)) {
+          res.header('Cache-Control', 'public, max-age=31536000, immutable');
+        } else {
+          res.header('Cache-Control', 'public, max-age=86400');
+        }
+      }
+    });
     app.setNotFoundHandler((req, reply) => {
       if (req.raw.url?.startsWith('/api/') || req.raw.url?.startsWith('/ws')) {
         return reply.status(404).send({ error: 'Not found' });

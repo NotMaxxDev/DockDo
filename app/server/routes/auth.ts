@@ -20,7 +20,7 @@ function setAuthCookies(reply: any, token: string, user: { id: string }, cfg: { 
 export async function registerAuthRoutes(app: FastifyInstance): Promise<void> {
   const cfg = { publicUrl: app.config.publicAppUrl, cookieSecret: app.config.cookieSecret };
 
-  app.post('/api/auth/login', async (req, reply) => {
+  app.post('/api/auth/login', { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } }, async (req, reply) => {
     const auth = await getAuthSettings();
     if (auth.mode === 'oidc') return reply.status(403).send({ error: 'Lokale Anmeldung ist deaktiviert. Bitte OIDC verwenden.' });
     const { email, password } = req.body as { email?: string; password?: string };
@@ -61,7 +61,7 @@ export async function registerAuthRoutes(app: FastifyInstance): Promise<void> {
     return { ok: true, user: publicUser(user) };
   });
 
-  app.post('/api/auth/totp', async (req, reply) => {
+  app.post('/api/auth/totp', { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } }, async (req, reply) => {
     const { totpToken, code } = req.body as { totpToken?: string; code?: string };
     const data = verifyPayload(totpToken || '') as { uid?: string; step?: string } | null;
     if (!data || data.step !== 'totp' || !data.uid) return reply.status(400).send({ error: 'Ungültiges TOTP-Ticket.' });
@@ -101,7 +101,7 @@ export async function registerAuthRoutes(app: FastifyInstance): Promise<void> {
     };
   });
 
-  app.post('/api/auth/register', async (req, reply) => {
+  app.post('/api/auth/register', { config: { rateLimit: { max: 20, timeWindow: '1 minute' } } }, async (req, reply) => {
     const { token, name, password } = req.body as { token?: string; name?: string; password?: string };
     if (!token || !name || !password) return reply.status(400).send({ error: 'Unvollständige Daten.' });
     const invite = await getDb().select().from(invites).where(eq(invites.tokenHash, sha256hex(token))).limit(1).then((r) => r[0]);

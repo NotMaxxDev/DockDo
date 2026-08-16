@@ -9,6 +9,7 @@ import { BoardPage } from './pages/Board';
 import { SettingsPage } from './pages/Settings';
 import { SearchPage } from './pages/Search';
 import { LaunchScreen, useInstallCheck } from './LaunchScreen';
+import { PwaBanner } from './PwaBanner';
 
 export default function App() {
   const { meta, user, loading, bootstrapped } = useStore();
@@ -30,27 +31,33 @@ export default function App() {
 
   if (meta && !user && !bootstrapped) {
     return (
-      <Routes>
-        <Route path="/setup" element={<SetupWizard />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="*" element={<SetupProbe />} />
-      </Routes>
+      <>
+        <PwaBanner />
+        <Routes>
+          <Route path="/setup" element={<SetupWizard />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="*" element={<SetupProbe />} />
+        </Routes>
+      </>
     );
   }
 
   return (
-    <Routes>
-      <Route path="/setup" element={<SetupWizard />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/" element={user ? <MainLayout /> : <Navigate to="/login" replace />}>
-        <Route index element={<DashboardPage />} />
-        <Route path="list/:listId" element={<BoardPage />} />
-        <Route path="search" element={<SearchPage />} />
-        <Route path="settings" element={<SettingsPage />} />
-      </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <PwaBanner />
+      <Routes>
+        <Route path="/setup" element={<SetupWizard />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/" element={user ? <MainLayout /> : <Navigate to="/login" replace />}>
+          <Route index element={<DashboardPage />} />
+          <Route path="list/:listId" element={<BoardPage />} />
+          <Route path="search" element={<SearchPage />} />
+          <Route path="settings" element={<SettingsPage />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 }
 

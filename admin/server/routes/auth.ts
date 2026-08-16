@@ -17,7 +17,7 @@ export function registerAdminAuthRoutes(app: FastifyInstance): void {
     reply.setCookie(CSRF, csrfToken(user.id), { ...opts, httpOnly: false });
   }
 
-  app.post('/api/admin/login', async (req, reply) => {
+  app.post('/api/admin/login', { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } }, async (req, reply) => {
     const auth = await getAuthSettings();
     if (auth.mode === 'oidc') return reply.status(403).send({ error: 'Lokale Anmeldung ist deaktiviert.' });
     const { email, password } = req.body as { email?: string; password?: string };
@@ -38,7 +38,7 @@ export function registerAdminAuthRoutes(app: FastifyInstance): void {
     return { ok: true, user: publicAdminUser(user) };
   });
 
-  app.post('/api/admin/totp', async (req, reply) => {
+  app.post('/api/admin/totp', { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } }, async (req, reply) => {
     const auth = await getAuthSettings();
     const { totpToken, code } = req.body as { totpToken?: string; code?: string };
     const { verifyPayload, verifyTotp } = await import('@dockdo/shared');

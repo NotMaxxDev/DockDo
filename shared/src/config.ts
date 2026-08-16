@@ -49,11 +49,39 @@ export function defaultDataDir(cwd: string = process.cwd()): string {
   return path.join(cwd, '..', 'data');
 }
 
+const KNOWN_INSECURE_SECRETS = ['dockdo-insecure-dev-secret-change-me', 'change-me', 'change-me-too'];
+
+function readOrCreateSecret(dataDir: string, explicit: string | undefined): string {
+  if (explicit && !KNOWN_INSECURE_SECRETS.includes(explicit)) return explicit;
+  const secretPath = path.join(dataDir, 'secret');
+  try {
+    if (fs.existsSync(secretPath)) return fs.readFileSync(secretPath, 'utf-8').trim();
+  } catch {
+    /* ignore */
+  }
+  const secret = require('crypto').randomBytes(32).toString('hex');
+  try {
+    fs.mkdirSync(dataDir, { recursive: true });
+    const tmp = `${secretPath}.tmp`;
+    fs.writeFileSync(tmp, secret, { mode: 0o600 });
+    fs.renameSync(tmp, secretPath);
+  } catch {
+    /* ignore */
+  }
+  return secret;
+}
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const dataDir = path.resolve(env.DATA_DIR || defaultDataDir());
   const fileMode = readDbModeFile(dataDir);
   const modeEnv = (env.DB_MODE || 'sqlite').toLowerCase();
   const dbMode: 'sqlite' | 'mariadb' = fileMode || (modeEnv === 'mariadb' ? 'mariadb' : 'sqlite');
+  if (dbMode === 'mariadb') {
+    const pw = env.MARIADB_PASSWORD || '';
+    if (!pw || KNOWN_INSECURE_SECRETS.includes(pw)) {
+      throw new Error('[config] DB_MODE=mariadb erfordert ein eigenes MARIADB_PASSWORD in der .env – die bekannten Default-Passwörter sind in Produktion nicht erlaubt. Setze MARIADB_PASSWORD auf einen langen Zufallswert (docker compose up benötigt dann --profile mariadb).');
+    }
+  }
   const mariadbUser = substituteDot('MARIADB_DATABASE', env.MARIADB_DATABASE || 'todoapp', env.MARIADB_USER || 'todoapp');
   const publicAppUrl = (env.PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '');
   const publicAdminUrl = (env.PUBLIC_ADMIN_URL || 'http://localhost:3001').replace(/\/$/, '');
@@ -64,7 +92,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     host: env.HOST || '0.0.0.0',
     dataDir,
     dbMode,
-    cookieSecret: env.COOKIE_SECRET || 'dockdo-insecure-dev-secret-change-me',
+    cookieSecret: readOrCreateSecret(dataDir, env.COOKIE_SECRET),
     sessionTtlDays: parseInt(env.SESSION_TTL_DAYS || '30', 10),
     publicAppUrl,
     publicAdminUrl,
