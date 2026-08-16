@@ -128,10 +128,10 @@ export function SetupWizard() {
   const showShimmer = busy || finishing;
 
   return (
-    <div className="flex min-h-screen bg-bg">
-      <aside className="relative hidden w-[46%] overflow-hidden bg-gradient-to-br from-[#3730a3] via-primary to-accent lg:block">
+    <div className="flex h-screen bg-bg">
+      <aside className="relative hidden w-[46%] shrink-0 overflow-hidden bg-gradient-to-br from-[#3730a3] via-primary to-accent lg:block">
         <div className="absolute inset-0" style={{ backgroundImage: NOISE_URI, backgroundSize: '160px' }} />
-        <div className="relative flex h-full flex-col justify-between p-10">
+        <div className="relative z-10 flex h-full flex-col justify-between p-8 pb-44 lg:p-10">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-theme bg-white/15 text-lg font-black text-white backdrop-blur">D</div>
             <span className="text-sm font-bold uppercase tracking-[0.35em] text-white/80">DockDo</span>
@@ -139,7 +139,7 @@ export function SetupWizard() {
 
           <div className="dockdo-rise">
             <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.3em] text-white/60">Deine Installation</p>
-            <h1 className="text-4xl font-black leading-tight text-white">
+            <h1 className="text-3xl font-black leading-tight text-white lg:text-4xl">
               Dein Dock,
               <br />
               klar zur Fahrt.
@@ -147,7 +147,7 @@ export function SetupWizard() {
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/70">
               Richte dein DockDo in wenigen Minuten ein — komplett selbst gehostet, deine Daten bleiben im eigenen Hafen.
             </p>
-            <div className="mt-8 flex items-center gap-3 text-white/60">
+            <div className="mt-7 flex items-center gap-3 text-white/60">
               {STEPS.map((s) => (
                 <span key={s.key} className={`h-1.5 w-10 rounded-full transition-colors duration-500 ${progress >= s.key ? 'bg-white' : 'bg-white/25'}`} />
               ))}
@@ -155,17 +155,17 @@ export function SetupWizard() {
             </div>
           </div>
 
-          <div className="absolute inset-x-0 bottom-0 h-48 overflow-hidden">
-            <div className="dockdo-wave absolute inset-x-0 bottom-12 h-14 w-[200%] text-white/25">
+          <div className="absolute inset-x-0 bottom-0 h-40 overflow-hidden">
+            <div className="dockdo-wave absolute inset-x-0 bottom-10 h-12 w-[200%] text-white/25">
               <Wave />
               <Wave />
             </div>
-            <div className="dockdo-wave-slow absolute inset-x-0 bottom-6 h-12 w-[200%] text-white/15">
+            <div className="dockdo-wave-slow absolute inset-x-0 bottom-4 h-10 w-[200%] text-white/15">
               <Wave />
               <Wave />
             </div>
             <div
-              className="dockdo-ship absolute bottom-16 transition-all duration-700 ease-out"
+              className="dockdo-ship absolute bottom-14 transition-all duration-700 ease-out"
               style={{ left: `calc(${percent}% - 44px)` }}
             >
               <ShipSvg />
@@ -175,9 +175,9 @@ export function SetupWizard() {
         </div>
       </aside>
 
-      <main className="flex flex-1 items-center justify-center p-6 sm:p-10">
+      <main className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto p-6 sm:p-8">
         <div className="w-full max-w-md">
-          <div className="mb-8 flex items-center gap-3 lg:hidden">
+          <div className="mb-6 flex items-center gap-3 lg:hidden">
             <div className="flex h-10 w-10 items-center justify-center rounded-theme bg-primary text-lg font-black text-white">D</div>
             <div>
               <h1 className="text-lg font-black leading-tight text-ink">DockDo</h1>
@@ -185,14 +185,14 @@ export function SetupWizard() {
             </div>
           </div>
 
-          <div className="mb-8">
+          <div className="mb-6">
             <div className="mb-3 flex items-end justify-between">
               <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-muted">
                 Schritt {step} von {STEPS.length}
               </p>
               <p className="font-mono text-sm font-bold tabular-nums text-ink">{percent}%</p>
             </div>
-            <div className="relative h-2.5 overflow-hidden rounded-full bg-line">
+            <div className="relative h-2 overflow-hidden rounded-full bg-line">
               <div
                 className="relative h-full rounded-full bg-gradient-to-r from-primary to-accent transition-all duration-700 ease-out"
                 style={{ width: `${percent}%` }}
@@ -242,7 +242,7 @@ export function SetupWizard() {
               </button>
             </div>
           ) : step === 1 ? (
-            <form key={step} onSubmit={submitAccount} className="dockdo-rise space-y-4">
+            <form key={step} onSubmit={submitAccount} className="dockdo-rise space-y-3.5">
               <div>
                 <h2 className="text-xl font-black leading-tight text-ink">Wer führt dein Dock?</h2>
                 <p className="mt-1 text-sm text-muted">Erstelle das Administrator-Konto — es verwaltet die gesamte Installation.</p>
@@ -282,7 +282,7 @@ export function SetupWizard() {
               </button>
             </form>
           ) : (
-            <div key={step} className="dockdo-rise space-y-4">
+            <div key={step} className="dockdo-rise space-y-3.5">
               <div>
                 <h2 className="text-xl font-black leading-tight text-ink">Wähle die Datenbank</h2>
                 <p className="mt-1 text-sm text-muted">Aktueller Modus: <span className="font-mono font-semibold text-ink">{dbMode}</span></p>
