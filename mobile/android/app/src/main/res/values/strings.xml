@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DockDo</string>
+    <string name="server_hint">Server-Adresse</string>
+    <string name="server_placeholder">z. B. https://meine-domain.de oder http://192.168.1.5:3000</string>
+    <string name="connect">Verbinden</string>
+    <string name="welcome_title">Willkommen bei DockDo</string>
+    <string name="welcome_text">Gib die Adresse deines DockDo-Servers ein, um dich anzumelden. Die App merkt sich die Adresse.</string>
+    <string name="change_server">Server wechseln</string>
+    <string name="reload">Neu laden</string>
+    <string name="about">Info</string>
+    <string name="about_text">DockDo ist ein WebView-Client für deinen selbst gehosteten DockDo-Server.\n\nAlle Funktionen des User-Portals funktionieren direkt in der App.</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="ssl_title">Sicherheitszertifikat</string>
+    <string name="ssl_message">Das Zertifikat konnte nicht verifiziert werden (z. B. selbstsigniert). Nur fortsetzen, wenn du dem Server vertraust.</string>
+    <string name="ssl_proceed">Trotzdem fortfahren</string>
+</resources>

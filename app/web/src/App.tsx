@@ -9,7 +9,6 @@ import { BoardPage } from './pages/Board';
 import { SettingsPage } from './pages/Settings';
 import { SearchPage } from './pages/Search';
 import { LaunchScreen, useInstallCheck } from './LaunchScreen';
-import { PwaBanner } from './PwaBanner';
 
 export default function App() {
   const { meta, user, loading, bootstrapped } = useStore();

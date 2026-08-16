@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.DockDo" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/dockdo_primary</item>
+        <item name="colorPrimaryDark">@color/ic_launcher_background</item>
+        <item name="colorAccent">#38bdf8</item>
+        <item name="android:statusBarColor">@color/dockdo_dark</item>
+        <item name="android:navigationBarColor">@color/dockdo_dark</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

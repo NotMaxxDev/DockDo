@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#4f46e5</color>
+    <color name="dockdo_primary">#6366f1</color>
+    <color name="dockdo_dark">#060b18</color>
+</resources>
