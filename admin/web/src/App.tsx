@@ -163,7 +163,14 @@ function Login({ onSuccess, appName }: { onSuccess: () => Promise<void>; appName
   const [totpToken, setTotpToken] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const [bg] = useState(() => `https://picsum.photos/1920/1080?random=${Date.now()}`);
+  const [bg, setBg] = useState<string | null>(null);
+  useEffect(() => {
+    const url = `https://picsum.photos/1280/720?random=${Date.now()}`;
+    const img = new Image();
+    img.onload = () => setBg(url);
+    img.src = url;
+    return () => { img.onload = null; };
+  }, []);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -200,7 +207,7 @@ function Login({ onSuccess, appName }: { onSuccess: () => Promise<void>; appName
   return (
     <div
       className="login-wrapper"
-      style={{ ['--login-bg' as string]: `url('${bg}')` } as React.CSSProperties}
+      style={bg ? ({ ['--login-bg' as string]: `url('${bg}')` } as React.CSSProperties) : undefined}
     >
       <div className="login-overlay" />
       <div className="login-card">

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useStore } from './store';
 import { SetupWizard } from './pages/Setup';
@@ -11,8 +11,15 @@ import { LaunchScreen, useInstallCheck } from './LaunchScreen';
 
 export default function App() {
   const { meta, user, loading, bootstrapped } = useStore();
+  const [splash, setSplash] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setSplash(true), 450);
+    return () => clearTimeout(t);
+  }, []);
 
   if (loading) {
+    if (!splash) return <div className="min-h-screen bg-bg" />;
     return <LaunchScreen state="loading" message="Lade DockDo…" />;
   }
 

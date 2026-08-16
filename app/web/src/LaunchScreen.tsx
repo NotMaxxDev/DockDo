@@ -164,7 +164,7 @@ export function useInstallCheck(onDone: (state: { done: boolean }) => void): {
   const startRef = useRef(Date.now());
 
   const STATUSES = ['Prüfe Datenbank…', 'Prüfe Zertifikate…', 'Prüfe Konfiguration…', 'Prüfe Installation…', 'Fast fertig…'];
-  const MIN_DURATION = 2400;
+  const MIN_DURATION = 0;
 
   const retry = () => {
     setPhase('loading');
@@ -209,7 +209,7 @@ export function useInstallCheck(onDone: (state: { done: boolean }) => void): {
   useEffect(() => {
     if (result === null || phase !== 'loading') return;
     const elapsed = Date.now() - startRef.current;
-    const delay = Math.max(0, MIN_DURATION - elapsed) + 250;
+    const delay = Math.max(0, MIN_DURATION - elapsed) + 50;
     const t = setTimeout(() => {
       setProgress(100);
       setRemaining(0);

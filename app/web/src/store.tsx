@@ -88,15 +88,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const boot = useCallback(async () => {
     try {
-      const m = await api<Meta>('/api/meta');
+      const [m, meRes] = await Promise.all([
+        api<Meta>('/api/meta'),
+        api<{ user: UserDto; csrf: string }>('/api/auth/me').catch(() => null)
+      ]);
       setMeta(m);
-      try {
-        const me = await api<{ user: UserDto; csrf: string }>('/api/auth/me');
-        setUser(me.user);
-        setCsrf(me.csrf);
-        setCsrfState(me.csrf);
-        applyUserTheme(me.user, m.themes, m.defaultTheme.config);
-        const rows = await api<ListDto[]>('/api/lists');
+      if (meRes) {
+        setUser(meRes.user);
+        setCsrf(meRes.csrf);
+        setCsrfState(meRes.csrf);
+        applyUserTheme(meRes.user, m.themes, m.defaultTheme.config);
+        const rows = await api<ListDto[]>('/api/lists').catch(() => [] as ListDto[]);
         setLists(rows);
         for (const l of rows.slice(0, 20)) {
           wsClient.subscribe(l.id);
@@ -104,7 +106,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         }
         setBootstrapped(true);
         wsClient.connect();
-      } catch {
+      } else {
         setUser(null);
       }
     } catch {
