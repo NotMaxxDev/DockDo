@@ -26,7 +26,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "NODE_TLS_REJECT_UNAUTHORIZED=0 node -e \"fetch('https://127.0.0.1:3000/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))\""]
+      test: ["CMD-SHELL", "node -e \"const{h}=require('http'),{g}=require('https');const t=p=>new Promise(r=>{const m=p==='https'?g:h;m.get(p+'://127.0.0.1:3000/health',x=>{x.resume();r(x.statusCode===200)}).on('error',()=>r(false))});t('http').then(a=>a?process.exit(0):t('https').then(b=>process.exit(b?0:1)))\""]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -59,7 +59,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "NODE_TLS_REJECT_UNAUTHORIZED=0 node -e \"fetch('https://127.0.0.1:3001/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))\""]
+      test: ["CMD-SHELL", "node -e \"const{h}=require('http'),{g}=require('https');const t=p=>new Promise(r=>{const m=p==='https'?g:h;m.get(p+'://127.0.0.1:3001/health',x=>{x.resume();r(x.statusCode===200)}).on('error',()=>r(false))});t('http').then(a=>a?process.exit(0):t('https').then(b=>process.exit(b?0:1)))\""]
       interval: 30s
       timeout: 5s
       retries: 3

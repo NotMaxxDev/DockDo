@@ -26,7 +26,13 @@ const CSRF = 'dockdo_admin_csrf';
 export async function main(): Promise<void> {
   const config = loadConfig();
   fs.mkdirSync(config.dataDir, { recursive: true });
-  const { keyPath, certPath } = ensureSelfSignedCert(config.dataDir);
+  let keyPath = '';
+  let certPath = '';
+  if (config.tls) {
+    const certs = ensureSelfSignedCert(config.dataDir);
+    keyPath = certs.keyPath;
+    certPath = certs.certPath;
+  }
   await initDatabase(config, 'admin');
   await createDefaultThemeIfMissing();
   await seedPresetThemes();
@@ -35,10 +41,7 @@ export async function main(): Promise<void> {
     logger: false,
     trustProxy: true,
     bodyLimit: 4 * 1024 * 1024,
-    https: {
-      key: fs.readFileSync(keyPath),
-      cert: fs.readFileSync(certPath)
-    }
+    ...(config.tls ? { https: { key: fs.readFileSync(keyPath), cert: fs.readFileSync(certPath) } } : {})
   });
   app.config = config;
   app.source = 'admin';

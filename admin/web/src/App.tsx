@@ -163,10 +163,7 @@ function Login({ onSuccess, appName }: { onSuccess: () => Promise<void>; appName
   const [totpToken, setTotpToken] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const [bg] = useState(() => {
-    const bgs = ['/login-bg.jpg', '/login-bg-2.jpg', '/login-bg-3.jpg'];
-    return bgs[Math.floor(Math.random() * bgs.length)];
-  });
+  const [bg] = useState(() => `https://picsum.photos/1920/1080?random=${Date.now()}`);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();

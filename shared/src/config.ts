@@ -14,6 +14,7 @@ export interface Config {
   sessionTtlDays: number;
   publicAppUrl: string;
   publicAdminUrl: string;
+  tls: boolean;
   mariadb: {
     host: string;
     port: number;
@@ -54,6 +55,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const modeEnv = (env.DB_MODE || 'sqlite').toLowerCase();
   const dbMode: 'sqlite' | 'mariadb' = fileMode || (modeEnv === 'mariadb' ? 'mariadb' : 'sqlite');
   const mariadbUser = substituteDot('MARIADB_DATABASE', env.MARIADB_DATABASE || 'todoapp', env.MARIADB_USER || 'todoapp');
+  const publicAppUrl = (env.PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '');
+  const publicAdminUrl = (env.PUBLIC_ADMIN_URL || 'http://localhost:3001').replace(/\/$/, '');
+  const tls = env.TLS === undefined ? publicAppUrl.startsWith('https://') || publicAdminUrl.startsWith('https://') : env.TLS === 'on' || env.TLS === 'true';
   return {
     appPort: parseInt(env.APP_PORT || '3000', 10),
     adminPort: parseInt(env.ADMIN_PORT || '3001', 10),
@@ -62,8 +66,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     dbMode,
     cookieSecret: env.COOKIE_SECRET || 'dockdo-insecure-dev-secret-change-me',
     sessionTtlDays: parseInt(env.SESSION_TTL_DAYS || '30', 10),
-    publicAppUrl: (env.PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, ''),
-    publicAdminUrl: (env.PUBLIC_ADMIN_URL || 'http://localhost:3001').replace(/\/$/, ''),
+    publicAppUrl,
+    publicAdminUrl,
+    tls,
     mariadb: {
       host: env.MARIADB_HOST || '127.0.0.1',
       port: parseInt(env.MARIADB_PORT || '3306', 10),
