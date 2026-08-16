@@ -123,3 +123,14 @@ body {
   100% { transform: scale(1.35); opacity: 0; }
 }
 .dockdo-ring { animation: dockdo-ring 1.8s ease-out infinite; }
+
+@keyframes dockdo-spin-slow {
+  to { transform: rotate(360deg); }
+}
+.dockdo-spin-slow { animation: dockdo-spin-slow 2.6s linear infinite; }
+
+@keyframes dockdo-twinkle {
+  0%, 100% { opacity: 0.15; transform: scale(0.8); }
+  50% { opacity: 0.9; transform: scale(1.15); }
+}
+.dockdo-star { animation: dockdo-twinkle 3s ease-in-out infinite; }

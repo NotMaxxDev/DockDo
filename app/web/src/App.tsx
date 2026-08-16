@@ -7,7 +7,7 @@ import { MainLayout } from './pages/MainLayout';
 import { BoardPage } from './pages/Board';
 import { SettingsPage } from './pages/Settings';
 import { SearchPage } from './pages/Search';
-import { LaunchScreen } from './LaunchScreen';
+import { LaunchScreen, useInstallCheck } from './LaunchScreen';
 
 export default function App() {
   const { meta, user, loading, bootstrapped } = useStore();
@@ -44,28 +44,29 @@ export default function App() {
 
 function SetupProbe() {
   const navigate = useNavigate();
-  const [state, setState] = React.useState<'loading' | 'error'>('loading');
-  const check = React.useCallback(() => {
-    setState('loading');
-    void (async () => {
-      try {
-        const res = await fetch('/api/setup/state');
-        if (!res.ok) throw new Error(String(res.status));
-        const data = (await res.json()) as { done: boolean };
-        if (data.done) navigate('/login', { replace: true });
-        else navigate('/setup', { replace: true });
-      } catch {
-        setState('error');
-      }
-    })();
-  }, [navigate]);
-  useEffect(() => {
-    check();
-  }, [check]);
-  if (state === 'error') {
-    return <LaunchScreen state="error" message="Prüfung fehlgeschlagen." detail="Der Server konnte nicht erreicht werden." onRetry={check} />;
+  const { phase, progress, remaining, status, retry } = useInstallCheck((state) => {
+    if (state.done) navigate('/login', { replace: true });
+    else navigate('/setup', { replace: true });
+  });
+  if (phase === 'error') {
+    return (
+      <LaunchScreen
+        state="error"
+        message="Prüfung fehlgeschlagen."
+        detail="Der Server konnte nicht erreicht werden."
+        onRetry={retry}
+      />
+    );
   }
-  return <LaunchScreen state="loading" message="Prüfe Installation…" />;
+  return (
+    <LaunchScreen
+      state="loading"
+      message="Prüfe Installation…"
+      status={status}
+      progress={progress}
+      remaining={remaining}
+    />
+  );
 }
 
 function RegisterPage() {
