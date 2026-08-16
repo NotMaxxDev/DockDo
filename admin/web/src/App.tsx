@@ -197,37 +197,74 @@ function Login({ onSuccess, appName }: { onSuccess: () => Promise<void>; appName
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg p-4">
-      <div className="w-full max-w-[400px] rounded-2xl border border-line bg-surface p-8 shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
-        <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-accent text-xl font-black text-white shadow-lg shadow-primary/30">
+    <div
+      className="relative flex min-h-screen w-full items-center justify-center overflow-hidden p-4"
+      style={{ backgroundImage: "url('/login-bg.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}
+    >
+      <div className="absolute inset-0 bg-[#0A0E1A]/75" />
+      <div className="relative w-full max-w-[400px] rounded-[20px] border border-white/10 bg-[#0F1420]/90 p-8 shadow-[0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-[10px] sm:p-10">
+        <div className="flex flex-col items-center text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-[#6366F1] text-xl font-black text-white">
             D
           </div>
-          <h1 className="text-xl font-bold leading-tight">{appName}</h1>
-          <p className="mt-1 text-xs text-muted">Administrationsbereich – nur für Admins.</p>
+          <h1 className="mt-4 text-2xl font-bold leading-tight text-white">{appName}</h1>
+          <p className="mb-8 mt-1 text-sm text-[#8B92A8]">Administrationsbereich – nur für Admins.</p>
         </div>
         {!totpToken && (
           <form onSubmit={submit} className="space-y-5">
             <div>
-              <label className="label">E-Mail</label>
-              <input className="input !px-4 !py-3 !rounded-lg" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus />
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.5px] text-[#6B7280]">E-Mail</label>
+              <input
+                className="w-full rounded-[10px] border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-white/40 focus:border-[#6366F1]"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoFocus
+                placeholder="admin@beispiel.de"
+              />
             </div>
             <div>
-              <label className="label">Passwort</label>
-              <input className="input !px-4 !py-3 !rounded-lg" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.5px] text-[#6B7280]">Passwort</label>
+              <input
+                className="w-full rounded-[10px] border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-white/40 focus:border-[#6366F1]"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+              />
             </div>
-            {error && <div className="rounded-theme bg-danger/10 px-3 py-2 text-sm text-danger">{error}</div>}
-            <button className="mt-1 w-full rounded-lg bg-primary py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50" disabled={busy}>{busy ? 'Anmelden…' : 'Anmelden'}</button>
+            {error && <div className="rounded-lg bg-danger/15 px-3 py-2 text-sm text-danger">{error}</div>}
+            <button
+              className="mt-2 w-full cursor-pointer rounded-[10px] bg-[#6366F1] py-[14px] text-sm font-semibold text-white transition-colors hover:bg-[#5558E3] disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={busy}
+            >
+              {busy ? 'Anmelden…' : 'Anmelden'}
+            </button>
           </form>
         )}
         {totpToken && (
           <form onSubmit={submitTotp} className="space-y-5">
             <div>
-              <label className="label">Zwei-Faktor-Code</label>
-              <input className="input !px-4 !py-3 !rounded-lg" value={totp} onChange={(e) => setTotp(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="000000" required inputMode="numeric" autoFocus />
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.5px] text-[#6B7280]">Zwei-Faktor-Code</label>
+              <input
+                className="w-full rounded-[10px] border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-white/40 focus:border-[#6366F1]"
+                value={totp}
+                onChange={(e) => setTotp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                placeholder="000000"
+                required
+                inputMode="numeric"
+                autoFocus
+              />
             </div>
-            {error && <div className="rounded-theme bg-danger/10 px-3 py-2 text-sm text-danger">{error}</div>}
-            <button className="mt-1 w-full rounded-lg bg-primary py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50" disabled={busy}>Bestätigen</button>
+            {error && <div className="rounded-lg bg-danger/15 px-3 py-2 text-sm text-danger">{error}</div>}
+            <button
+              className="mt-2 w-full cursor-pointer rounded-[10px] bg-[#6366F1] py-[14px] text-sm font-semibold text-white transition-colors hover:bg-[#5558E3] disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={busy}
+            >
+              Bestätigen
+            </button>
           </form>
         )}
       </div>
