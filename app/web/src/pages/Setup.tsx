@@ -130,15 +130,6 @@ export function SetupWizard() {
               ))}
               <span className="font-mono text-sm font-bold tabular-nums text-white/80">{percent}%</span>
             </div>
-            {showShimmer && (
-              <div className="dockdo-dots mt-7 justify-start">
-                <span className="dockdo-dot" />
-                <span className="dockdo-dot" />
-                <span className="dockdo-dot" />
-                <span className="dockdo-dot" />
-                <span className="dockdo-dot" />
-              </div>
-            )}
           </div>
         </div>
       </aside>
@@ -160,27 +151,36 @@ export function SetupWizard() {
                 {showShimmer && <div className="dockdo-shimmer absolute inset-y-0 w-1/2 rounded-full bg-gradient-to-r from-transparent via-white/50 to-transparent" />}
               </div>
             </div>
-            <div className="mt-2.5 flex items-center justify-between text-[11px] font-semibold">
+            <div className="mt-2.5 flex items-center justify-between gap-1 text-[11px] font-semibold">
               {STEPS.map((s) => {
                 const isDone = progress > s.key;
                 const isCurrent = progress === s.key;
+                const clickable = s.key <= step && !busy && !finishing && !done;
                 return (
-                  <span key={s.key} className={`flex items-center gap-1.5 ${isDone ? 'text-ok' : isCurrent ? 'text-ink' : 'text-muted/50'}`}>
+                  <button
+                    key={s.key}
+                    type="button"
+                    disabled={!clickable}
+                    onClick={() => setStep(s.key)}
+                    className={`flex items-center gap-1.5 rounded-full px-2 py-1 transition-colors ${
+                      isDone ? 'text-ok' : isCurrent ? 'bg-primary/10 text-ink' : 'text-muted/50'
+                    } ${clickable ? 'cursor-pointer hover:bg-primary/10 hover:text-ink' : 'cursor-default'}`}
+                  >
                     {isDone ? (
                       <Check size={13} strokeWidth={3.5} />
                     ) : (
                       <span className={`h-1.5 w-1.5 rounded-full ${isCurrent ? 'dockdo-pulse-dot bg-primary' : 'bg-line'}`} />
                     )}
                     {s.label}
-                  </span>
+                  </button>
                 );
               })}
             </div>
           </div>
 
           {done ? (
-            <div className="dockdo-rise card p-8 text-center">
-              <div className="mx-auto mb-5 h-16 w-16">
+            <div className="dockdo-rise card p-6 text-center">
+              <div className="mx-auto mb-4 h-11 w-11">
                 <svg viewBox="0 0 52 52" className="h-full w-full" aria-hidden>
                   <circle cx="26" cy="26" r="24" fill="none" stroke="rgb(var(--c-success))" strokeWidth="3" className="dockdo-check-circle" />
                   <path
@@ -194,8 +194,8 @@ export function SetupWizard() {
                   />
                 </svg>
               </div>
-              <h1 className="mb-1 text-xl font-black text-ink">Anker los!</h1>
-              <p className="mb-6 text-sm text-muted">Dein Admin-Konto ist bereit. Melde dich an und leg los.</p>
+              <h1 className="mb-1 text-lg font-black text-ink">Anker los!</h1>
+              <p className="mb-5 text-sm text-muted">Dein Admin-Konto ist bereit. Melde dich an und leg los.</p>
               <button className="btn-primary w-full" onClick={() => navigate('/login', { replace: true })}>
                 <Ship size={16} />
                 Zum Login
