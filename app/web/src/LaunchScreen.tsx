@@ -90,6 +90,16 @@ export function LaunchScreen({ state, message, detail, onRetry, progress, remain
           </p>
         )}
 
+        {loading && (
+          <div className="dockdo-rise dockdo-dots mt-8" style={{ animationDelay: '0.22s' }}>
+            <span className="dockdo-dot" />
+            <span className="dockdo-dot" />
+            <span className="dockdo-dot" />
+            <span className="dockdo-dot" />
+            <span className="dockdo-dot" />
+          </div>
+        )}
+
         {checking && (
           <div className="dockdo-rise mt-10 w-full max-w-lg" style={{ animationDelay: '0.24s' }}>
             <div className="mb-3 flex items-end justify-between">

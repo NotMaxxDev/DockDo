@@ -1,4 +1,4 @@
-const CACHE = 'dockdo-shell-v2';
+const CACHE = 'dockdo-shell-v3';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icon.svg'];
 
 self.addEventListener('install', (event) => {

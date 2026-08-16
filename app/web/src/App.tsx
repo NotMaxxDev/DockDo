@@ -21,9 +21,13 @@ export default function App() {
   }
 
   if (meta && !user && !bootstrapped) {
-    const needsSetup = !meta.defaultTheme;
-    void needsSetup;
-    return <SetupProbe />;
+    return (
+      <Routes>
+        <Route path="/setup" element={<SetupWizard />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="*" element={<SetupProbe />} />
+      </Routes>
+    );
   }
 
   return (
@@ -43,8 +47,9 @@ export default function App() {
 }
 
 function SetupProbe() {
+  const navigate = useNavigate();
   const { phase, progress, remaining, status, retry } = useInstallCheck((state) => {
-    window.location.assign(state.done ? '/login' : '/setup');
+    navigate(state.done ? '/login' : '/setup', { replace: true });
   });
   if (phase === 'error') {
     return (
