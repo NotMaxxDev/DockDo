@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Navigate } from 'react-router-dom';
 import {
   DndContext, closestCenter, PointerSensor, useSensor, useSensors,
   type DragEndEvent
@@ -8,7 +8,7 @@ import {
   SortableContext, verticalListSortingStrategy, useSortable, arrayMove
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Plus, Trash2, Calendar, Tag, Flag, ChevronDown, Search } from 'lucide-react';
+import { Plus, Trash2, Calendar, Tag, Flag, ChevronDown, Search, X } from 'lucide-react';
 import { useStore } from '../store';
 import type { TaskDto } from '../types';
 import { api } from '../api';
@@ -64,9 +64,8 @@ export function BoardPage() {
   const submitNew = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTaskTitle.trim() || !listId) return;
-    const row = await createTask(listId, { title: newTaskTitle.trim() });
+    await createTask(listId, { title: newTaskTitle.trim() });
     setNewTaskTitle('');
-    setSelected(row);
   };
 
   const onDragEnd = async (e: DragEndEvent) => {
@@ -91,7 +90,7 @@ export function BoardPage() {
     setConfirmDelete(false);
   };
 
-  if (!list) return <div className="p-8 text-center text-muted">Liste wird geladen…</div>;
+  if (!list) return <Navigate to="/" replace />;
 
   const activePresence = presence[list.id] || [];
 
@@ -327,7 +326,7 @@ function TaskDetail({ task, canEdit, members, labels, onClose, onChanged, onDele
   return (
     <Modal title="" onClose={onClose} wide>
       <div className="space-y-4">
-        <input className="input text-lg font-semibold" value={title} onChange={(e) => setTitle(e.target.value)} disabled={!canEdit} />
+        <input className="input pr-10 text-lg font-semibold" value={title} onChange={(e) => setTitle(e.target.value)} disabled={!canEdit} />
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
@@ -460,8 +459,15 @@ export function Modal({ title, children, onClose, wide }: { title: React.ReactNo
   }, [onClose]);
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4">
-      <div className={`max-h-[92vh] w-full overflow-y-auto rounded-t-theme bg-surface p-5 sm:rounded-theme ${wide ? 'sm:max-w-2xl' : 'sm:max-w-md'}`}>
-        {title && <h2 className="mb-4 text-lg font-bold">{title}</h2>}
+      <div className={`relative max-h-[92vh] w-full overflow-y-auto rounded-t-theme bg-surface p-5 sm:rounded-theme ${wide ? 'sm:max-w-2xl' : 'sm:max-w-md'}`}>
+        <button
+          onClick={onClose}
+          className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full text-muted transition-colors hover:bg-line hover:text-ink"
+          title="Schließen"
+        >
+          <X className="h-4 w-4" />
+        </button>
+        {title && <h2 className="mb-4 pr-10 text-lg font-bold">{title}</h2>}
         {children}
       </div>
     </div>

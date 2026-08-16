@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Plus, Search, MailPlus, Trash2, Ban, CheckCircle, KeyRound, Shield } from 'lucide-react';
+import { Plus, Search, MailPlus, Trash2, Ban, CheckCircle, KeyRound, Shield, X } from 'lucide-react';
 import { api } from '../api';
 
 interface UserRow {
@@ -258,8 +258,15 @@ export function Modal({ title, children, onClose, wide }: { title: string; child
   }, [onClose]);
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4">
-      <div className={`max-h-[92vh] w-full overflow-y-auto rounded-t-theme bg-surface p-5 sm:rounded-theme ${wide ? 'sm:max-w-3xl' : 'sm:max-w-lg'}`}>
-        <h2 className="mb-4 text-lg font-bold">{title}</h2>
+      <div className={`relative max-h-[92vh] w-full overflow-y-auto rounded-t-theme bg-surface p-5 sm:rounded-theme ${wide ? 'sm:max-w-3xl' : 'sm:max-w-lg'}`}>
+        <button
+          onClick={onClose}
+          className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full text-muted transition-colors hover:bg-line hover:text-ink"
+          title="Schließen"
+        >
+          <X className="h-4 w-4" />
+        </button>
+        <h2 className="mb-4 pr-10 text-lg font-bold">{title}</h2>
         {children}
       </div>
     </div>

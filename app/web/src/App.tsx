@@ -4,6 +4,7 @@ import { useStore } from './store';
 import { SetupWizard } from './pages/Setup';
 import { LoginPage } from './pages/Login';
 import { MainLayout } from './pages/MainLayout';
+import { DashboardPage } from './pages/Dashboard';
 import { BoardPage } from './pages/Board';
 import { SettingsPage } from './pages/Settings';
 import { SearchPage } from './pages/Search';
@@ -43,7 +44,7 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/" element={user ? <MainLayout /> : <Navigate to="/login" replace />}>
-        <Route index element={<BoardPage />} />
+        <Route index element={<DashboardPage />} />
         <Route path="list/:listId" element={<BoardPage />} />
         <Route path="search" element={<SearchPage />} />
         <Route path="settings" element={<SettingsPage />} />

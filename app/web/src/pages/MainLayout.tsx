@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate, NavLink } from 'react-router-dom';
-import { Settings, LogOut, Search, Menu, X } from 'lucide-react';
+import { Settings, LogOut, Search, Menu, X, LayoutDashboard } from 'lucide-react';
 import { useStore } from '../store';
 
 export function MainLayout() {
@@ -17,8 +17,10 @@ export function MainLayout() {
   const sidebar = (
     <div className="flex h-full w-64 flex-col border-r border-line bg-surface">
       <div className="flex items-center gap-2 px-4 py-4">
-        <img src="/icon.svg" alt="DockDo" className="h-8 w-8" />
-        <span className="text-lg font-bold">{meta?.appName || 'DockDo'}</span>
+        <NavLink to="/" onClick={() => setDrawer(false)} className="flex items-center gap-2">
+          <img src="/icon.svg" alt="DockDo" className="h-8 w-8" />
+          <span className="text-lg font-bold">{meta?.appName || 'DockDo'}</span>
+        </NavLink>
       </div>
       <div className="px-3">
         <form onSubmit={submitSearch} className="relative">
@@ -35,6 +37,17 @@ export function MainLayout() {
         <span className="text-xs font-semibold uppercase tracking-wide text-muted">Listen</span>
       </div>
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 pb-3">
+        <NavLink
+          to="/"
+          end
+          onClick={() => setDrawer(false)}
+          className={({ isActive }) =>
+            `flex items-center gap-2 rounded-theme px-3 py-2 text-sm transition-colors ${isActive ? 'bg-primary/10 font-semibold text-primary' : 'text-ink hover:bg-bg'}`
+          }
+        >
+          <LayoutDashboard className="h-4 w-4 text-muted" />
+          Übersicht
+        </NavLink>
         {lists.map((l) => {
           const active = presence[l.id] || [];
           return (
