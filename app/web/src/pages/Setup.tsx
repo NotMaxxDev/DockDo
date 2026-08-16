@@ -12,29 +12,6 @@ const STEPS = [
 const NOISE_URI =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E\")";
 
-function Wave() {
-  return (
-    <svg viewBox="0 0 600 48" preserveAspectRatio="none" className="h-full w-1/2">
-      <path d="M0 24 Q75 6 150 24 T300 24 T450 24 T600 24 V48 H0 Z" fill="currentColor" />
-    </svg>
-  );
-}
-
-function ShipSvg() {
-  return (
-    <svg viewBox="0 0 140 58" className="h-14 w-auto drop-shadow-lg" aria-hidden>
-      <path d="M10 40 L28 24 L72 20 L122 26 L130 38 Q70 46 10 40 Z" fill="#ffffff" opacity="0.96" />
-      <path d="M28 24 L72 20 L72 40 L28 40 Z" fill="#e2e8f0" />
-      <rect x="36" y="6" width="16" height="14" rx="2" fill="#c7d2fe" />
-      <rect x="56" y="2" width="20" height="18" rx="2" fill="#ffffff" />
-      <rect x="98" y="2" width="12" height="16" rx="3" fill="#0f172a" />
-      <circle cx="104" cy="22" r="3.5" fill="#0f172a" opacity="0.85" />
-      <circle cx="66" cy="22" r="2.5" fill="#0f172a" opacity="0.6" />
-      <circle cx="58" cy="22" r="2" fill="#0f172a" opacity="0.4" />
-    </svg>
-  );
-}
-
 export function SetupWizard() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -131,7 +108,7 @@ export function SetupWizard() {
     <div className="flex h-screen bg-bg">
       <aside className="relative hidden w-[46%] shrink-0 overflow-hidden bg-gradient-to-br from-[#3730a3] via-primary to-accent lg:block">
         <div className="absolute inset-0" style={{ backgroundImage: NOISE_URI, backgroundSize: '160px' }} />
-        <div className="relative z-10 flex h-full flex-col justify-between p-8 pb-44 lg:p-10">
+        <div className="relative z-10 flex h-full flex-col justify-between p-8 lg:p-10">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-theme bg-white/15 text-lg font-black text-white backdrop-blur">D</div>
             <span className="text-sm font-bold uppercase tracking-[0.35em] text-white/80">DockDo</span>
@@ -153,38 +130,21 @@ export function SetupWizard() {
               ))}
               <span className="font-mono text-sm font-bold tabular-nums text-white/80">{percent}%</span>
             </div>
-          </div>
-
-          <div className="absolute inset-x-0 bottom-0 h-40 overflow-hidden">
-            <div className="dockdo-wave absolute inset-x-0 bottom-10 h-12 w-[200%] text-white/25">
-              <Wave />
-              <Wave />
-            </div>
-            <div className="dockdo-wave-slow absolute inset-x-0 bottom-4 h-10 w-[200%] text-white/15">
-              <Wave />
-              <Wave />
-            </div>
-            <div
-              className="dockdo-ship absolute bottom-14 transition-all duration-700 ease-out"
-              style={{ left: `calc(${percent}% - 44px)` }}
-            >
-              <ShipSvg />
-            </div>
-            <div className="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-black/30 to-transparent" />
+            {showShimmer && (
+              <div className="dockdo-dots mt-7 justify-start">
+                <span className="dockdo-dot" />
+                <span className="dockdo-dot" />
+                <span className="dockdo-dot" />
+                <span className="dockdo-dot" />
+                <span className="dockdo-dot" />
+              </div>
+            )}
           </div>
         </div>
       </aside>
 
       <main className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto p-6 sm:p-8">
         <div className="w-full max-w-md">
-          <div className="mb-6 flex items-center gap-3 lg:hidden">
-            <div className="flex h-10 w-10 items-center justify-center rounded-theme bg-primary text-lg font-black text-white">D</div>
-            <div>
-              <h1 className="text-lg font-black leading-tight text-ink">DockDo</h1>
-              <p className="text-xs text-muted">Deine Installation einrichten</p>
-            </div>
-          </div>
-
           <div className="mb-6">
             <div className="mb-3 flex items-end justify-between">
               <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-muted">
