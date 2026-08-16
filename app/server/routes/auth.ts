@@ -87,13 +87,15 @@ export async function registerAuthRoutes(app: FastifyInstance): Promise<void> {
 
   app.get('/api/auth/me', async (req, reply) => {
     if (!req.user) return reply.status(401).send({ error: 'Nicht angemeldet' });
+    const csrf = csrfToken(req.user.id);
+    reply.setCookie(APP_CSRF, csrf, { ...cookieOptions(cfg, 86400), httpOnly: false });
     const userSessions = await getDb().select().from(sessions).where(eq(sessions.userId, req.user.id)).orderBy(sessions.createdAt);
     const auth = await getAuthSettings();
     const general = await getGeneralSettings();
     return {
       user: publicUser(req.user),
       sessions: userSessions.map((s) => ({ id: s.id, ip: s.ip, userAgent: s.userAgent, lastSeenAt: s.lastSeenAt, createdAt: s.createdAt, current: s.id === req.sessionId })),
-      csrf: csrfToken(req.user.id),
+      csrf,
       authMode: auth.mode,
       general: { appName: general.appName }
     };

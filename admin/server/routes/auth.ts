@@ -64,9 +64,11 @@ export function registerAdminAuthRoutes(app: FastifyInstance): void {
     if (!req.user) return reply.status(401).send({ error: 'Nicht angemeldet' });
     if (req.user.role !== 'admin') return reply.status(403).send({ error: 'Kein Admin-Zugriff.' });
     const general = await getGeneralSettings();
+    const csrf = csrfToken(req.user.id);
+    reply.setCookie(CSRF, csrf, { ...cookieOptions(cfg, 86400), httpOnly: false });
     return {
       user: publicAdminUser(req.user),
-      csrf: csrfToken(req.user.id),
+      csrf,
       appName: general.appName
     };
   });
