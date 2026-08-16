@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.http.SslError
 import android.os.Build
 import android.os.Bundle
+import android.webkit.JavascriptInterface
 import android.webkit.SslErrorHandler
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
@@ -13,7 +14,6 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity() {
 
@@ -23,6 +23,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var webView: WebView
+
+    inner class DockDoBridge {
+        @JavascriptInterface
+        fun openServerSetup() {
+            runOnUiThread {
+                startActivity(Intent(this@MainActivity, UrlSetupActivity::class.java))
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,8 +50,6 @@ class MainActivity : AppCompatActivity() {
 
         webView = findViewById(R.id.webview)
         setupWebView(webView)
-
-        findViewById<FloatingActionButton>(R.id.fab_menu).setOnClickListener { showMenu() }
 
         webView.loadUrl(url)
     }
@@ -67,6 +74,8 @@ class MainActivity : AppCompatActivity() {
             wv.setLayerType(WebView.LAYER_TYPE_HARDWARE, null)
         }
 
+        wv.addJavascriptInterface(DockDoBridge(), "DockDoBridge")
+
         wv.webChromeClient = WebChromeClient()
         wv.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
@@ -89,31 +98,6 @@ class MainActivity : AppCompatActivity() {
         var u = raw.trim().removeSuffix("/")
         if (!u.startsWith("http://") && !u.startsWith("https://")) u = "https://$u"
         return u
-    }
-
-    private fun showMenu() {
-        val items = arrayOf(getString(R.string.reload), getString(R.string.change_server), getString(R.string.about))
-        AlertDialog.Builder(this)
-            .setItems(items) { _, which ->
-                when (which) {
-                    0 -> webView.reload()
-                    1 -> changeServer()
-                    2 -> showAbout()
-                }
-            }
-            .show()
-    }
-
-    private fun changeServer() {
-        startActivity(Intent(this, UrlSetupActivity::class.java))
-    }
-
-    private fun showAbout() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.app_name)
-            .setMessage(R.string.about_text)
-            .setPositiveButton(R.string.ok, null)
-            .show()
     }
 
     @Deprecated("Deprecated in Java")

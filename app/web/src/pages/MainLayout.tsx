@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate, NavLink } from 'react-router-dom';
-import { Settings, LogOut, Search, Menu, X, LayoutDashboard } from 'lucide-react';
+import { Settings, LogOut, Search, Menu, X, LayoutDashboard, ListTodo } from 'lucide-react';
 import { useStore } from '../store';
 
 export function MainLayout() {
@@ -13,6 +13,13 @@ export function MainLayout() {
     e.preventDefault();
     if (search.trim()) navigate(`/search?q=${encodeURIComponent(search.trim())}`);
   };
+
+  const tabs = [
+    { to: '/', label: 'Übersicht', icon: LayoutDashboard, end: true },
+    { to: '/lists', label: 'Listen', icon: ListTodo, end: false },
+    { to: '/search', label: 'Suche', icon: Search, end: false },
+    { to: '/settings', label: 'Einstellungen', icon: Settings, end: false }
+  ];
 
   const sidebar = (
     <div className="flex h-full w-64 flex-col border-r border-line bg-surface">
@@ -104,12 +111,25 @@ export function MainLayout() {
           </button>
           <span className="font-bold">{meta?.appName || 'DockDo'}</span>
         </header>
-        <main className="min-h-0 flex-1 overflow-y-auto bg-bg">
+        <main className="min-h-0 flex-1 overflow-y-auto bg-bg pb-20 md:pb-0">
           <Outlet />
         </main>
+        <nav className="fixed inset-x-0 bottom-0 z-30 flex border-t border-line bg-surface/95 backdrop-blur md:hidden">
+          {tabs.map((t) => (
+            <NavLink
+              key={t.to}
+              to={t.to}
+              end={t.end}
+              className={({ isActive }) =>
+                `flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] transition-colors ${isActive ? 'text-primary' : 'text-muted hover:text-ink'}`
+              }
+            >
+              <t.icon className="h-5 w-5" />
+              {t.label}
+            </NavLink>
+          ))}
+        </nav>
       </div>
     </div>
   );
 }
-
-const active = true;

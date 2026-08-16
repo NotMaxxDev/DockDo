@@ -3,6 +3,12 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useStore } from '../store';
 import { api } from '../api';
 
+declare global {
+  interface Window {
+    DockDoBridge?: { openServerSetup: () => void };
+  }
+}
+
 export function SettingsPage() {
   const { user, meta, selectTheme, updateUserLocally, refreshMe } = useStore();
   const [sessions, setSessions] = useState<{ id: string; ip: string | null; userAgent: string | null; lastSeenAt: string; current?: boolean }[]>([]);
@@ -133,6 +139,16 @@ export function SettingsPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6 px-4 py-6">
       <h1 className="text-2xl font-bold">Einstellungen</h1>
+
+      {window.DockDoBridge && (
+        <section className="card p-5">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">App</h2>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-muted">Du nutzt die DockDo-App. Hier kannst du die Verbindung zu einem anderen Server wechseln.</p>
+            <button className="btn-ghost shrink-0" onClick={() => window.DockDoBridge!.openServerSetup()}>Server wechseln</button>
+          </div>
+        </section>
+      )}
 
       <section className="card p-5">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">Erscheinungsbild</h2>

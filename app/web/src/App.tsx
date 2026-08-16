@@ -5,6 +5,7 @@ import { SetupWizard } from './pages/Setup';
 import { LoginPage } from './pages/Login';
 import { MainLayout } from './pages/MainLayout';
 import { DashboardPage } from './pages/Dashboard';
+import { ListsPage } from './pages/Lists';
 import { BoardPage } from './pages/Board';
 import { SettingsPage } from './pages/Settings';
 import { SearchPage } from './pages/Search';
@@ -31,7 +32,6 @@ export default function App() {
   if (meta && !user && !bootstrapped) {
     return (
       <>
-        <PwaBanner />
         <Routes>
           <Route path="/setup" element={<SetupWizard />} />
           <Route path="/login" element={<LoginPage />} />
@@ -43,13 +43,13 @@ export default function App() {
 
   return (
     <>
-      <PwaBanner />
       <Routes>
         <Route path="/setup" element={<SetupWizard />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/" element={user ? <MainLayout /> : <Navigate to="/login" replace />}>
           <Route index element={<DashboardPage />} />
+          <Route path="lists" element={<ListsPage />} />
           <Route path="list/:listId" element={<BoardPage />} />
           <Route path="search" element={<SearchPage />} />
           <Route path="settings" element={<SettingsPage />} />
