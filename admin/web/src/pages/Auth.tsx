@@ -25,6 +25,10 @@ interface AuthConfig {
   emergencyAdminEmail: string;
 }
 
+interface SecurityConfig {
+  csrfEnabled: boolean;
+}
+
 const KEYCLOAK_STEPS = [
   'Im Keycloak Admin-Console links oben "Create Realm" wählen und einen Realm-Namen vergeben (z. B. "todoapp").',
   'Im Realm zu Clients → Create client navigieren. Eine Client-ID vergeben (z. B. "todoapp-web"), Client-Typ "OpenID Connect".',
@@ -49,6 +53,7 @@ const AUTHENTIK_STEPS = [
 
 export function AuthPage() {
   const [cfg, setCfg] = useState<AuthConfig | null>(null);
+  const [security, setSecurity] = useState<SecurityConfig | null>(null);
   const [wizard, setWizard] = useState<null | { provider: 'keycloak' | 'authentik'; edit?: OidcProvider }>(null);
   const [vapid, setVapid] = useState('');
   const [msg, setMsg] = useState('');
@@ -60,6 +65,7 @@ export function AuthPage() {
 
   useEffect(() => {
     void load();
+    void api<SecurityConfig>('/api/admin/settings/security').then(setSecurity).catch(() => undefined);
   }, []);
 
   const save = async (patch: Partial<AuthConfig>) => {
@@ -152,6 +158,30 @@ export function AuthPage() {
           <div className="mt-3">
             <label className="label">Session-Lebensdauer (Tage)</label>
             <input type="number" className="input" value={cfg.sessionTtlDays} onChange={(e) => void save({ sessionTtlDays: Number(e.target.value) })} min={1} />
+          </div>
+          <div className="mt-4 border-t border-line pt-3">
+            <label className="flex items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                className="mt-0.5 h-4 w-4"
+                checked={security?.csrfEnabled ?? true}
+                disabled={!security}
+                onChange={async (e) => {
+                  const res = await api<{ security: SecurityConfig }>('/api/admin/settings/security', {
+                    method: 'PUT',
+                    body: { csrfEnabled: e.target.checked }
+                  });
+                  setSecurity(res.security);
+                }}
+              />
+              <span>
+                <span className="font-medium">CSRF-Schutz aktiviert</span>
+                <span className="mt-0.5 block text-xs text-muted">
+                  Schützt vor Cross-Site-Request-Forgery-Angriffen. Nur deaktivieren, wenn externe Integrationen (z. B. eigene Clients)
+                  die X-CSRF-Token-Prüfung nicht erfüllen können – das schwächt die Sicherheit erheblich.
+                </span>
+              </span>
+            </label>
           </div>
         </div>
 

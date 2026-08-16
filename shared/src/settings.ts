@@ -47,6 +47,14 @@ export interface GeneralSettings {
   vapidSubject: string;
 }
 
+export interface SecuritySettings {
+  csrfEnabled: boolean;
+}
+
+export const DEFAULT_SECURITY: SecuritySettings = {
+  csrfEnabled: true
+};
+
 export const DEFAULT_AUTH: AuthSettings = {
   mode: 'local',
   local: { minPasswordLength: 8, lockoutThreshold: 5, lockoutMinutes: 15 },
@@ -120,6 +128,18 @@ export async function getGeneralSettings(): Promise<GeneralSettings> {
 
 export async function saveGeneralSettings(g: GeneralSettings): Promise<void> {
   await setSetting('general', g);
+}
+
+export async function getSecuritySettings(): Promise<SecuritySettings> {
+  const stored = await rawGet('security');
+  if (stored && typeof stored === 'object') {
+    return { ...DEFAULT_SECURITY, ...(stored as Partial<SecuritySettings>) };
+  }
+  return { ...DEFAULT_SECURITY };
+}
+
+export async function saveSecuritySettings(s: SecuritySettings): Promise<void> {
+  await setSetting('security', s);
 }
 
 export async function countUsers(): Promise<number> {

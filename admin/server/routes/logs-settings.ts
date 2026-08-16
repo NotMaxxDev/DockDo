@@ -3,6 +3,7 @@ import { eq, desc, like, or } from 'drizzle-orm';
 import {
   getDb, auditLogs, appEvents, audit, setSetting, getSmtpSettings,
   saveSmtpSettings, getGeneralSettings, saveGeneralSettings, loadConfig,
+  getSecuritySettings, saveSecuritySettings,
   formatBytes
 } from '@dockdo/shared';
 import { requireAdmin } from '../gateway';
@@ -37,10 +38,12 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
     if (!requireAdmin(req, reply)) return;
     const smtp = await getSmtpSettings();
     const general = await getGeneralSettings();
+    const security = await getSecuritySettings();
     const cfg = loadConfig();
     return {
       smtp,
       general: { ...general, vapidPrivateKey: general.vapidPrivateKey ? '••••••••' : '' },
+      security,
       system: {
         dbMode: cfg.dbMode,
         dataDir: cfg.dataDir,
@@ -82,6 +85,21 @@ export function registerSettingsRoutes(app: FastifyInstance): void {
     } catch (err) {
       return reply.status(500).send({ error: 'SMTP-Test fehlgeschlagen: ' + (err instanceof Error ? err.message : String(err)) });
     }
+  });
+
+  app.get('/api/admin/settings/security', async (req, reply) => {
+    if (!requireAdmin(req, reply)) return;
+    return await getSecuritySettings();
+  });
+
+  app.put('/api/admin/settings/security', async (req, reply) => {
+    if (!requireAdmin(req, reply)) return;
+    const body = req.body as { csrfEnabled?: boolean };
+    const s = await getSecuritySettings();
+    if (typeof body.csrfEnabled === 'boolean') s.csrfEnabled = body.csrfEnabled;
+    await saveSecuritySettings(s);
+    await audit(req.user!, 'settings:security-updated', 'system', undefined, { csrfEnabled: s.csrfEnabled }, req.clientIp);
+    return { ok: true, security: s };
   });
 
   app.put('/api/admin/settings/general', async (req, reply) => {

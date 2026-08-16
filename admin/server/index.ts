@@ -6,7 +6,7 @@ import fastifyStatic from '@fastify/static';
 import * as path from 'path';
 import * as fs from 'fs';
 import {
-  loadConfig, initDatabase, createDefaultThemeIfMissing, seedPresetThemes, getGeneralSettings,
+  loadConfig, initDatabase, createDefaultThemeIfMissing, seedPresetThemes, getGeneralSettings, getSecuritySettings,
   cleanupStale, setSetting, csrfToken, verifyCsrf, cookieOptions,
   getSessionTokenFromCookie, findSessionByToken, uuid, nowIso, getDb,
   settings, ensureSelfSignedCert
@@ -57,6 +57,8 @@ export async function main(): Promise<void> {
     if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) return;
     if (!req.user) return;
     if (url.startsWith('/api/admin/login') || url.startsWith('/api/admin/totp')) return;
+    const sec = await getSecuritySettings();
+    if (!sec.csrfEnabled) return;
     const raw = req.headers.cookie || '';
     const cookies = Object.fromEntries(raw.split(';').filter(Boolean).map((p) => {
       const [k, ...v] = p.trim().split('=');

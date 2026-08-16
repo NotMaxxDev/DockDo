@@ -7,7 +7,7 @@ import websocket from '@fastify/websocket';
 import * as path from 'path';
 import * as fs from 'fs';
 import {
-  loadConfig, initDatabase, createDefaultThemeIfMissing, seedPresetThemes, getAuthSettings,
+  loadConfig, initDatabase, createDefaultThemeIfMissing, seedPresetThemes, getAuthSettings, getSecuritySettings,
   getGeneralSettings, logAppEvent, cleanupStale, setSetting, ensureSelfSignedCert
 } from '@dockdo/shared';
 import { registerAuthPlugin, csrfCookieName } from './plugins';
@@ -63,6 +63,8 @@ export async function main(): Promise<void> {
     const routeUrl = req.routeOptions?.url || '';
     if (routeUrl.startsWith('/ws') || routeUrl.startsWith('/api/auth/login') || routeUrl.startsWith('/api/auth/totp') || routeUrl.startsWith('/api/setup')) return;
     if (!req.user) return;
+    const sec = await getSecuritySettings();
+    if (!sec.csrfEnabled) return;
     const cookieName = csrfCookieName('app');
     const raw = req.headers.cookie || '';
     const cookies = Object.fromEntries(raw.split(';').filter(Boolean).map((p) => {
