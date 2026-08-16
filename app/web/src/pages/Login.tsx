@@ -12,6 +12,10 @@ export function LoginPage() {
   const [totpToken, setTotpToken] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [bg] = useState(() => {
+    const bgs = ['/login-bg.jpg', '/login-bg-2.jpg', '/login-bg-3.jpg'];
+    return bgs[Math.floor(Math.random() * bgs.length)];
+  });
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,18 +56,14 @@ export function LoginPage() {
 
   return (
     <div
-      className="relative flex min-h-screen w-full items-center justify-center overflow-hidden p-4"
-      style={{ backgroundImage: "url('/login-bg.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}
+      className="login-wrapper"
+      style={{ ['--login-bg' as string]: `url('${bg}')` } as React.CSSProperties}
     >
-      <div className="absolute inset-0 bg-[#0A0E1A]/75" />
-      <div className="relative w-full max-w-[400px] rounded-[20px] border border-white/10 bg-[#0F1420]/90 p-8 shadow-[0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-[10px] sm:p-10">
-        <div className="flex flex-col items-center text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-[#6366F1] text-xl font-black text-white">
-            D
-          </div>
-          <h1 className="mt-4 text-2xl font-bold leading-tight text-white">{meta?.appName || 'DockDo'}</h1>
-          <p className="mb-8 mt-1 text-sm text-[#8B92A8]">Deine Aufgaben, immer synchron.</p>
-        </div>
+      <div className="login-overlay" />
+      <div className="login-card">
+        <div className="login-logo">D</div>
+        <h1 className="login-title">{meta?.appName || 'DockDo'}</h1>
+        <p className="login-slogan">Deine Aufgaben, immer synchron.</p>
 
         {oidcProviders.length > 0 && (
           <div className="mb-5 space-y-2">
@@ -76,11 +76,12 @@ export function LoginPage() {
         )}
 
         {canLocal && !totpToken && (
-          <form onSubmit={submit} className="space-y-5">
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.5px] text-[#6B7280]">E-Mail</label>
+          <form onSubmit={submit}>
+            <div className="login-group">
+              <label className="login-label" htmlFor="login-email">E-Mail</label>
               <input
-                className="w-full rounded-[10px] border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-white/40 focus:border-[#6366F1]"
+                className="login-input"
+                id="login-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -90,10 +91,11 @@ export function LoginPage() {
                 placeholder="du@beispiel.de"
               />
             </div>
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.5px] text-[#6B7280]">Passwort</label>
+            <div className="login-group">
+              <label className="login-label" htmlFor="login-password">Passwort</label>
               <input
-                className="w-full rounded-[10px] border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-white/40 focus:border-[#6366F1]"
+                className="login-input"
+                id="login-password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -102,22 +104,20 @@ export function LoginPage() {
                 placeholder="••••••••"
               />
             </div>
-            {error && <div className="rounded-lg bg-danger/15 px-3 py-2 text-sm text-danger">{error}</div>}
-            <button
-              className="mt-2 w-full cursor-pointer rounded-[10px] bg-[#6366F1] py-[14px] text-sm font-semibold text-white transition-colors hover:bg-[#5558E3] disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={busy}
-            >
+            {error && <div className="login-error">{error}</div>}
+            <button className="login-btn" disabled={busy}>
               {busy ? 'Anmelden…' : 'Anmelden'}
             </button>
           </form>
         )}
 
         {totpToken && (
-          <form onSubmit={submitTotp} className="space-y-5">
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.5px] text-[#6B7280]">Zwei-Faktor-Code</label>
+          <form onSubmit={submitTotp}>
+            <div className="login-group">
+              <label className="login-label" htmlFor="login-totp">Zwei-Faktor-Code</label>
               <input
-                className="w-full rounded-[10px] border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-white/40 focus:border-[#6366F1]"
+                className="login-input"
+                id="login-totp"
                 value={totp}
                 onChange={(e) => setTotp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 placeholder="000000"
@@ -126,11 +126,8 @@ export function LoginPage() {
                 autoFocus
               />
             </div>
-            {error && <div className="rounded-lg bg-danger/15 px-3 py-2 text-sm text-danger">{error}</div>}
-            <button
-              className="mt-2 w-full cursor-pointer rounded-[10px] bg-[#6366F1] py-[14px] text-sm font-semibold text-white transition-colors hover:bg-[#5558E3] disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={busy}
-            >
+            {error && <div className="login-error">{error}</div>}
+            <button className="login-btn" disabled={busy}>
               Bestätigen
             </button>
           </form>
