@@ -209,7 +209,6 @@ function Login({ onSuccess, appName }: { onSuccess: () => Promise<void>; appName
       <div className="login-card">
         <div className="login-logo">D</div>
         <h1 className="login-title">{appName}</h1>
-        <p className="login-slogan">Administrationsbereich – nur für Admins.</p>
         {!totpToken && (
           <form onSubmit={submit}>
             <div className="login-group">

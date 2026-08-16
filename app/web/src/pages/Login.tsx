@@ -63,7 +63,6 @@ export function LoginPage() {
       <div className="login-card">
         <div className="login-logo">D</div>
         <h1 className="login-title">{meta?.appName || 'DockDo'}</h1>
-        <p className="login-slogan">Deine Aufgaben, immer synchron.</p>
 
         {oidcProviders.length > 0 && (
           <div className="mb-5 space-y-2">

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate, NavLink } from 'react-router-dom';
-import { Plus, Settings, LogOut, Search, Menu, X, WifiOff, Wifi } from 'lucide-react';
+import { Plus, Settings, LogOut, Search, Menu, X } from 'lucide-react';
 import { useStore } from '../store';
 
 export function MainLayout() {
-  const { lists, user, meta, presence, online, logout, createList, bootstrapped } = useStore();
+  const { lists, user, meta, presence, logout, createList, bootstrapped } = useStore();
   const navigate = useNavigate();
   const [drawer, setDrawer] = useState(false);
   const [newListMode, setNewListMode] = useState(false);
@@ -40,7 +40,7 @@ export function MainLayout() {
       </div>
       <div className="px-3">
         <form onSubmit={submitSearch} className="relative">
-          <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-muted" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
           <input
             className="input pl-9"
             placeholder="Suchen…"
@@ -85,10 +85,6 @@ export function MainLayout() {
         {lists.length === 0 && <div className="px-3 py-6 text-center text-xs text-muted">Noch keine Listen. Erstelle deine erste Liste mit dem + Button.</div>}
       </nav>
       <div className="border-t border-line p-3">
-        <div className="mb-1 flex items-center gap-2 text-xs text-muted">
-          {online ? <Wifi className="h-3.5 w-3.5 text-ok" /> : <WifiOff className="h-3.5 w-3.5 text-warn" />}
-          {online ? 'Verbunden' : 'Offline'}
-        </div>
         <NavLink to="/settings" onClick={() => setDrawer(false)} className="flex items-center gap-2 rounded-theme px-2 py-2 text-sm text-ink hover:bg-bg">
           <Settings className="h-4 w-4 text-muted" />
           Einstellungen
@@ -120,9 +116,6 @@ export function MainLayout() {
             <Menu className="h-5 w-5" />
           </button>
           <span className="font-bold">{meta?.appName || 'DockDo'}</span>
-          <div className="ml-auto flex items-center gap-2 text-xs text-muted">
-            {online ? <Wifi className="h-4 w-4 text-ok" /> : <WifiOff className="h-4 w-4 text-warn" />}
-          </div>
         </header>
         <main className="min-h-0 flex-1 overflow-y-auto bg-bg">
           <Outlet />
