@@ -66,8 +66,12 @@ export function LaunchScreen({ state, message, detail, onRetry, progress, remain
               }}
             />
           )}
-          <div className="dockdo-rise relative flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-[#4f46e5] to-[#38bdf8] text-4xl font-black text-white shadow-[0_0_80px_rgba(79,70,229,0.55)]">
-            D
+          <div className="dockdo-rise relative">
+            <img
+              src="/icon.svg"
+              alt="DockDo"
+              className="h-24 w-24 rounded-[28px] shadow-[0_0_80px_rgba(79,70,229,0.55)]"
+            />
             {!loading && (
               <span className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#ef4444] text-white shadow-lg">
                 <AlertTriangle size={16} strokeWidth={3} />

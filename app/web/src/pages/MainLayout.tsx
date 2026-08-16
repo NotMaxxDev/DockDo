@@ -17,7 +17,7 @@ export function MainLayout() {
   const sidebar = (
     <div className="flex h-full w-64 flex-col border-r border-line bg-surface">
       <div className="flex items-center gap-2 px-4 py-4">
-        <div className="flex h-8 w-8 items-center justify-center rounded-theme bg-primary text-sm font-bold text-white">D</div>
+        <img src="/icon.svg" alt="DockDo" className="h-8 w-8" />
         <span className="text-lg font-bold">{meta?.appName || 'DockDo'}</span>
       </div>
       <div className="px-3">

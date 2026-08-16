@@ -61,7 +61,7 @@ export function LoginPage() {
     >
       <div className="login-overlay" />
       <div className="login-card">
-        <div className="login-logo">D</div>
+        <img src="/icon.svg" alt="" className="login-logo" />
         <h1 className="login-title">{meta?.appName || 'DockDo'}</h1>
 
         {oidcProviders.length > 0 && (

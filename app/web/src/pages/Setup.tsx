@@ -110,7 +110,7 @@ export function SetupWizard() {
         <div className="absolute inset-0" style={{ backgroundImage: NOISE_URI, backgroundSize: '160px' }} />
         <div className="relative z-10 flex h-full flex-col justify-between p-8 lg:p-10">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-theme bg-white/15 text-lg font-black text-white backdrop-blur">D</div>
+            <img src="/icon.svg" alt="DockDo" className="h-10 w-10 rounded-xl shadow-lg" />
             <span className="text-sm font-bold uppercase tracking-[0.35em] text-white/80">DockDo</span>
           </div>
 
