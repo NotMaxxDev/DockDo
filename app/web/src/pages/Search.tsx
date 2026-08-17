@@ -35,10 +35,9 @@ export function SearchPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-6">
       <h1 className="mb-4 text-2xl font-bold">Suche</h1>
-      <form onSubmit={submit} className="relative mb-4">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+      <form onSubmit={submit} className="search mb-4">
+        <Search />
         <input
-          className="input pl-9"
           placeholder="Nach Aufgaben suchen…"
           value={input}
           onChange={(e) => setInput(e.target.value)}

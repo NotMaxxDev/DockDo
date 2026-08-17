@@ -64,6 +64,18 @@ body {
 .input {
   @apply w-full rounded-theme border border-line bg-surface px-3 py-2 text-sm outline-none placeholder:text-muted/70 focus:border-primary;
 }
+.search {
+  @apply flex w-full items-center gap-2 rounded-theme border border-line bg-surface px-3;
+}
+.search > svg {
+  @apply h-4 w-4 shrink-0 text-muted;
+}
+.search input {
+  @apply w-full min-w-0 bg-transparent py-2 text-sm text-ink outline-none placeholder:text-muted/70;
+}
+.search:focus-within {
+  @apply border-primary;
+}
 .label {
   @apply mb-1 block text-xs font-semibold uppercase tracking-wide text-muted;
 }
@@ -294,14 +306,26 @@ body {
   }
 }
 
-/* Glassmorphism-Theme (config.glass) – iOS-26-Stil */
+/* Glassmorphism-Theme (config.glass) – voller Glassmorphism-Look */
 .glass body {
   background-color: rgb(var(--c-background));
-  background-image:
-    radial-gradient(1300px 700px at 5% -12%, rgb(var(--c-primary) / 0.5), transparent 62%),
-    radial-gradient(1100px 600px at 106% 8%, rgb(var(--c-accent) / 0.4), transparent 58%),
-    radial-gradient(1000px 750px at 55% 128%, rgb(var(--c-success) / 0.22), transparent 62%);
+  background-image: var(--app-bg, none), linear-gradient(180deg, rgb(255 255 255 / 0.02), rgb(0 0 0 / 0.25));
+  background-size: cover, 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
   background-attachment: fixed;
+}
+.glass body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgb(8 12 22 / 0.28), rgb(8 12 22 / 0.45));
+}
+.glass #root {
+  position: relative;
+  z-index: 1;
 }
 .glass .bg-bg {
   background-color: transparent;
@@ -310,23 +334,33 @@ body {
   background-color: rgb(var(--c-surface) / 0.42);
   backdrop-filter: blur(36px) saturate(1.8);
   -webkit-backdrop-filter: blur(36px) saturate(1.8);
-  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.14);
+  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.14), 0 8px 32px rgb(0 0 0 / 0.3);
+  border-color: rgb(255 255 255 / 0.12);
 }
 .glass .card {
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0.05) 28%, rgb(var(--c-surface) / 0.38));
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.16), rgb(255 255 255 / 0.06) 28%, rgb(var(--c-surface) / 0.38));
   backdrop-filter: blur(36px) saturate(1.8);
   -webkit-backdrop-filter: blur(36px) saturate(1.8);
   border-color: rgb(255 255 255 / 0.18);
-  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.2), 0 12px 40px rgb(0 0 0 / 0.28);
+  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.2), 0 12px 40px rgb(0 0 0 / 0.35);
 }
-.glass .input {
+.glass .input,
+.glass .search {
   background-color: rgb(var(--c-surface) / 0.45);
-  backdrop-filter: blur(22px) saturate(1.6);
-  -webkit-backdrop-filter: blur(22px) saturate(1.6);
+  backdrop-filter: blur(24px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
   border-color: rgb(255 255 255 / 0.14);
-  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.1);
+  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.1), 0 4px 20px rgb(0 0 0 / 0.25);
 }
 .glass .chip {
   backdrop-filter: blur(12px) saturate(1.4);
   -webkit-backdrop-filter: blur(12px) saturate(1.4);
+}
+.glass .btn-ghost,
+.glass .btn-quiet {
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+}
+.glass .hover\:bg-bg:hover {
+  background-color: rgb(255 255 255 / 0.08);
 }

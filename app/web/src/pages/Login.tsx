@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RefreshCw } from 'lucide-react';
 import { useStore } from '../store';
+import { getSessionBackground } from '../theme';
 
 export function LoginPage() {
   const { meta, login, completeTotp } = useStore();
@@ -14,7 +15,7 @@ export function LoginPage() {
   const [busy, setBusy] = useState(false);
   const [bg, setBg] = useState<string | null>(null);
   useEffect(() => {
-    const url = `https://picsum.photos/1280/720?random=${Date.now()}`;
+    const url = getSessionBackground();
     const img = new Image();
     img.onload = () => setBg(url);
     img.src = url;

@@ -34,6 +34,13 @@ export function toChannels(value: string): string {
   return v;
 }
 
+let sessionBg: string | null = null;
+
+export function getSessionBackground(): string {
+  if (!sessionBg) sessionBg = `https://picsum.photos/1280/720?random=${Date.now()}`;
+  return sessionBg;
+}
+
 export function applyTheme(config: ThemeConfig | null | undefined): void {
   const root = document.documentElement;
   if (!config) return;
@@ -54,6 +61,11 @@ export function applyTheme(config: ThemeConfig | null | undefined): void {
   root.style.colorScheme = config.mode === 'dark' ? 'dark' : 'light';
   root.classList.toggle('dark', config.mode === 'dark');
   root.classList.toggle('glass', !!config.glass);
+  if (config.glass) {
+    root.style.setProperty('--app-bg', `url('${getSessionBackground()}')`);
+  } else {
+    root.style.removeProperty('--app-bg');
+  }
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', config.primary || '#4f46e5');
 }
