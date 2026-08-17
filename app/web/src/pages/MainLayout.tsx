@@ -3,6 +3,8 @@ import { Outlet, useNavigate, NavLink } from 'react-router-dom';
 import { Settings, LogOut, Search, Menu, X, LayoutDashboard, ListTodo } from 'lucide-react';
 import { useStore } from '../store';
 
+const isApp = typeof window !== 'undefined' && typeof window.DockDoBridge !== 'undefined';
+
 export function MainLayout() {
   const { lists, user, meta, presence, logout, bootstrapped } = useStore();
   const navigate = useNavigate();
@@ -94,7 +96,7 @@ export function MainLayout() {
 
   return (
     <div className="flex h-screen">
-      <div className="hidden md:block">{sidebar}</div>
+      {!isApp && <div className="hidden md:block">{sidebar}</div>}
       {drawer && (
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="absolute inset-0 bg-black/40" onClick={() => setDrawer(false)} />
@@ -111,10 +113,11 @@ export function MainLayout() {
           </button>
           <span className="font-bold">{meta?.appName || 'DockDo'}</span>
         </header>
-        <main className="min-h-0 flex-1 overflow-y-auto bg-bg pb-20">
+        <main className={`min-h-0 flex-1 overflow-y-auto bg-bg ${isApp ? 'pb-20' : ''}`}>
           <Outlet />
         </main>
-        <nav className="fixed inset-x-0 bottom-0 z-30 flex border-t border-line bg-surface/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
+        {isApp && (
+          <nav className="fixed inset-x-0 bottom-0 z-30 flex border-t border-line bg-surface/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
           {tabs.map((t) => (
             <NavLink
               key={t.to}
@@ -128,7 +131,8 @@ export function MainLayout() {
               {t.label}
             </NavLink>
           ))}
-        </nav>
+          </nav>
+        )}
       </div>
     </div>
   );
