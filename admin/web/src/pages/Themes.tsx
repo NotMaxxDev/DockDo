@@ -30,6 +30,12 @@ function toVars(c: ThemeConfig): Record<string, string> {
   };
 }
 
+let previewBg: string | null = null;
+function getPreviewBackground(): string {
+  if (!previewBg) previewBg = `https://picsum.photos/1280/720?random=${Date.now()}`;
+  return previewBg;
+}
+
 function ThemePreview({ cfg }: { cfg: ThemeConfig }) {
   const vars = toVars(cfg) as React.CSSProperties;
   const g = !!cfg.glass;
@@ -37,16 +43,19 @@ function ThemePreview({ cfg }: { cfg: ThemeConfig }) {
   const blur: React.CSSProperties = g ? { backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)' } : {};
   return (
     <div
-      className="overflow-hidden rounded-xl border"
+      className="relative overflow-hidden rounded-xl border"
       style={{
         ...vars,
         fontFamily: cfg.font,
-        background: g ? `linear-gradient(135deg, ${glass(55)}, ${glass(40)})` : 'var(--c-background)',
+        background: g ? `url('${getPreviewBackground()}')` : 'var(--c-background)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
         color: 'var(--c-text)',
         borderColor: 'var(--c-border)'
       }}
     >
-      <div className="flex">
+      {g && <div className="pointer-events-none absolute inset-0" style={{ background: 'rgb(8 12 22 / 0.45)' }} />}
+      <div className="relative flex">
         <div className="hidden w-16 shrink-0 flex-col gap-1.5 p-2 sm:flex" style={{ background: g ? glass(25) : 'var(--c-surface)', borderRight: '1px solid var(--c-border)', ...blur }}>
           <div className="mb-1 flex h-5 w-5 items-center justify-center rounded text-[10px] font-bold text-white" style={{ background: 'var(--c-primary)' }}>D</div>
           <div className="h-2 w-10 rounded-full" style={{ background: 'var(--c-primary)', opacity: 0.8 }} />
@@ -279,7 +288,7 @@ function ThemeEditor({ theme, onSave, onClose }: {
             <input type="checkbox" className="h-4 w-4" checked={!!cfg.glass} onChange={(e) => set('glass', e.target.checked)} />
             <div>
               <div className="text-sm font-semibold">Glas-Effekt (Glassmorphism)</div>
-              <div className="text-xs text-muted">Transluzente Flächen mit Blur über farbigem Verlauf – der „Viral"-Look</div>
+              <div className="text-xs text-muted">Transluzente Flächen mit Blur über zufälligem Hintergrundbild – der „Viral"-Look</div>
             </div>
           </label>
           <div>
