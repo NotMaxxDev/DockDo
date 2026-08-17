@@ -19,9 +19,9 @@ class UrlSetupActivity : AppCompatActivity() {
         prefs.getString(MainActivity.KEY_URL, null)?.let { input.setText(it) }
 
         findViewById<Button>(R.id.btn_connect).setOnClickListener {
-            val url = normalizeUrl(input.text.toString())
-            if (url.isEmpty()) {
-                input.error = "Bitte eine Server-Adresse eingeben"
+            val url = parseServerUrl(input.text.toString())
+            if (url == null) {
+                input.error = "Bitte nur eine Domain oder eine IP mit Port 3000 eingeben (z. B. https://meine-domain.de oder http://192.168.1.5:3000). Port 3001 ist nicht erlaubt."
                 return@setOnClickListener
             }
             prefs.edit().putString(MainActivity.KEY_URL, url).apply()
@@ -29,11 +29,5 @@ class UrlSetupActivity : AppCompatActivity() {
             startActivity(Intent(this, MainActivity::class.java))
             finish()
         }
-    }
-
-    private fun normalizeUrl(raw: String): String {
-        var u = raw.trim().removeSuffix("/")
-        if (!u.startsWith("http://") && !u.startsWith("https://")) u = "https://$u"
-        return u
     }
 }

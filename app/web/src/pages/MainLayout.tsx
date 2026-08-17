@@ -111,10 +111,10 @@ export function MainLayout() {
           </button>
           <span className="font-bold">{meta?.appName || 'DockDo'}</span>
         </header>
-        <main className="min-h-0 flex-1 overflow-y-auto bg-bg pb-20 md:pb-0">
+        <main className="min-h-0 flex-1 overflow-y-auto bg-bg pb-20">
           <Outlet />
         </main>
-        <nav className="fixed inset-x-0 bottom-0 z-30 flex border-t border-line bg-surface/95 backdrop-blur md:hidden">
+        <nav className="fixed inset-x-0 bottom-0 z-30 flex border-t border-line bg-surface/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
           {tabs.map((t) => (
             <NavLink
               key={t.to}

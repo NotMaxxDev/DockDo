@@ -45,7 +45,11 @@ class MainActivity : AppCompatActivity() {
             finish()
             return
         }
-        url = normalizeUrl(url)
+        url = parseServerUrl(url) ?: run {
+            startActivity(Intent(this, UrlSetupActivity::class.java))
+            finish()
+            return
+        }
         prefs.edit().putString(KEY_URL, url).apply()
 
         webView = findViewById(R.id.webview)
@@ -92,12 +96,6 @@ class MainActivity : AppCompatActivity() {
                     .show()
             }
         }
-    }
-
-    private fun normalizeUrl(raw: String): String {
-        var u = raw.trim().removeSuffix("/")
-        if (!u.startsWith("http://") && !u.startsWith("https://")) u = "https://$u"
-        return u
     }
 
     @Deprecated("Deprecated in Java")
