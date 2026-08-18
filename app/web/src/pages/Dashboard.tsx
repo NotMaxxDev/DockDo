@@ -11,8 +11,9 @@ interface AggTask extends TaskDto {
 }
 
 export function DashboardPage() {
-  const { lists, tasksByList, user } = useStore();
+  const { lists, tasksByList, user, hiddenLists } = useStore();
   const navigate = useNavigate();
+  const visibleLists = lists.filter((l) => !hiddenLists.includes(l.id));
 
   const myTasks: AggTask[] = lists
     .flatMap((l) => (tasksByList[l.id] || []).map((t) => ({ ...t, listName: l.name, listColor: l.color })))
@@ -96,13 +97,15 @@ export function DashboardPage() {
           <h2 className="text-sm font-bold">Meine Listen</h2>
           <span className="text-xs text-muted">{lists.length}</span>
         </div>
-        {lists.length === 0 ? (
+        {visibleLists.length === 0 ? (
           <div className="card p-8 text-center text-sm text-muted">
-            Noch keine Listen. Ein Administrator weist dir Listen zu – sie erscheinen dann hier.
+            {lists.length === 0
+              ? 'Noch keine Listen. Ein Administrator weist dir Listen zu – sie erscheinen dann hier.'
+              : 'Alle Listen sind ausgeblendet. Einblenden kannst du sie unter „Listen“.'}
           </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
-            {lists.map((l) => {
+            {visibleLists.map((l) => {
               const tasks = tasksByList[l.id] || [];
               const done = tasks.filter((t) => t.status === 'done').length;
               const open = tasks.length - done;
@@ -112,7 +115,8 @@ export function DashboardPage() {
                 <button
                   key={l.id}
                   onClick={() => navigate(`/list/${l.id}`)}
-                  className="card group flex flex-col gap-3 p-4 text-left transition-transform hover:-translate-y-0.5"
+                  style={{ borderColor: l.color || type?.color || 'var(--c-primary)' }}
+                  className="card group flex flex-col gap-3 p-4 text-left transition-shadow hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.4)]"
                 >
                   <div className="flex items-center gap-3">
                     <div

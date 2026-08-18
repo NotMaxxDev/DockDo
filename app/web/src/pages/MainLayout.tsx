@@ -6,10 +6,11 @@ import { useStore } from '../store';
 const isApp = typeof window !== 'undefined' && typeof window.DockDoBridge !== 'undefined';
 
 export function MainLayout() {
-  const { lists, user, meta, presence, logout, bootstrapped } = useStore();
+  const { lists, meta, logout, hiddenLists } = useStore();
   const navigate = useNavigate();
   const [drawer, setDrawer] = useState(false);
   const [search, setSearch] = useState('');
+  const visibleLists = lists.filter((l) => !hiddenLists.includes(l.id));
 
   const submitSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,24 +57,22 @@ export function MainLayout() {
           <LayoutDashboard className="h-4 w-4 text-muted" />
           Übersicht
         </NavLink>
-        {lists.map((l) => {
-          const active = presence[l.id] || [];
-          return (
-            <NavLink
-              key={l.id}
-              to={`/list/${l.id}`}
-              onClick={() => setDrawer(false)}
-              className={({ isActive }) =>
-                `flex items-center gap-2 rounded-theme px-3 py-2 text-sm transition-colors ${isActive ? 'bg-primary/10 font-semibold text-primary' : 'text-ink hover:bg-bg'}`
-              }
-            >
-              <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: l.color || 'var(--c-primary)' }} />
-              <span className="flex-1 truncate">{l.name}</span>
-              {l.memberRole === 'viewer' && <span className="text-[10px] uppercase text-muted">Ro</span>}
-            </NavLink>
-          );
-        })}
-        {lists.length === 0 && (
+        {visibleLists.map((l) => (
+          <NavLink
+            key={l.id}
+            to={`/list/${l.id}`}
+            onClick={() => setDrawer(false)}
+            style={{ borderColor: l.color || 'var(--c-primary)' }}
+            className={({ isActive }) =>
+              `flex items-center gap-2 rounded-theme border px-3 py-2 text-sm transition-colors ${isActive ? 'bg-primary/10 font-semibold text-primary' : 'text-ink hover:bg-bg'}`
+            }
+          >
+            <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: l.color || 'var(--c-primary)' }} />
+            <span className="flex-1 truncate">{l.name}</span>
+            {l.memberRole === 'viewer' && <span className="text-[10px] uppercase text-muted">Ro</span>}
+          </NavLink>
+        ))}
+        {visibleLists.length === 0 && (
           <div className="px-3 py-6 text-center text-xs text-muted">
             Noch keine Listen. Ein Administrator weist dir Listen zu – sie erscheinen dann hier.
           </div>
@@ -84,8 +83,8 @@ export function MainLayout() {
           <Settings className="h-4 w-4 text-muted" />
           Einstellungen
         </NavLink>
-        <button onClick={() => void logout()} className="flex w-full items-center gap-2 rounded-theme px-2 py-2 text-left text-sm text-ink hover:bg-bg">
-          <LogOut className="h-4 w-4 text-muted" />
+        <button onClick={() => void logout()} className="flex w-full items-center gap-2 rounded-theme px-2 py-2 text-left text-sm text-ink hover:bg-danger/10 hover:text-danger">
+          <LogOut className="h-4 w-4 text-danger/70" />
           Abmelden
         </button>
       </div>

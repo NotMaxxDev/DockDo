@@ -24,6 +24,9 @@ interface StoreState {
   refreshTasks: (listId: string) => Promise<void>;
   updateList: (id: string, patch: Partial<ListDto>) => Promise<void>;
   deleteList: (id: string) => Promise<void>;
+  hiddenLists: string[];
+  hideList: (id: string) => void;
+  unhideList: (id: string) => void;
   createTask: (listId: string, data: Partial<TaskDto>) => Promise<TaskDto>;
   updateTask: (id: string, patch: Record<string, unknown>) => Promise<TaskDto | null>;
   deleteTask: (id: string) => Promise<void>;
@@ -41,6 +44,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserDto | null>(null);
   const [csrf, setCsrfState] = useState('');
   const [lists, setLists] = useState<ListDto[]>([]);
+  const [hiddenLists, setHiddenLists] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('dockdo.hiddenLists') || '[]') as string[];
+    } catch {
+      return [];
+    }
+  });
   const [tasksByList, setTasksByList] = useState<Record<string, TaskDto[]>>({});
   const [activeListId, setActiveListId] = useState<string | null>(null);
   const [presence, setPresence] = useState<Record<string, { userId: string; name: string }[]>>({});
@@ -214,6 +224,22 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const hideList = useCallback((id: string) => {
+    setHiddenLists((prev) => {
+      const next = prev.includes(id) ? prev : [...prev, id];
+      localStorage.setItem('dockdo.hiddenLists', JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const unhideList = useCallback((id: string) => {
+    setHiddenLists((prev) => {
+      const next = prev.filter((x) => x !== id);
+      localStorage.setItem('dockdo.hiddenLists', JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
   const createTask = useCallback(async (listId: string, data: Partial<TaskDto>) => {
     const row = await api<TaskDto>(`/api/lists/${listId}/tasks`, { method: 'POST', body: data });
     setTasksByList((prev) => ({ ...prev, [listId]: [...(prev[listId] || []), { ...row, labels: [], subtasks: [] }] }));
@@ -262,11 +288,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<StoreState>(() => ({
     meta, user, csrf, lists, tasksByList, activeListId, presence, online, loading, bootstrapped,
     login, completeTotp, logout, refreshMe, refreshLists, refreshTasks,
-    updateList, deleteList, createTask, updateTask, deleteTask, reorderTasks,
+    updateList, deleteList, hiddenLists, hideList, unhideList, createTask, updateTask, deleteTask, reorderTasks,
     setActiveList: setActiveListId, selectTheme, updateUserLocally
   }), [meta, user, csrf, lists, tasksByList, activeListId, presence, online, loading, bootstrapped,
     login, completeTotp, logout, refreshMe, refreshLists, refreshTasks,
-    updateList, deleteList, createTask, updateTask, deleteTask, reorderTasks, selectTheme, updateUserLocally]);
+    updateList, deleteList, hiddenLists, hideList, unhideList, createTask, updateTask, deleteTask, reorderTasks, selectTheme, updateUserLocally]);
 
   useEffect(() => {
     if (!navigator.serviceWorker) return;

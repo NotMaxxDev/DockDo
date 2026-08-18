@@ -8,7 +8,7 @@ import {
   SortableContext, verticalListSortingStrategy, useSortable, arrayMove
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Plus, Trash2, Calendar, Tag, Flag, ChevronDown, Search, X } from 'lucide-react';
+import { Plus, EyeOff, Trash2, Calendar, Tag, Flag, ChevronDown, Search, X } from 'lucide-react';
 import { useStore } from '../store';
 import type { TaskDto } from '../types';
 import { api } from '../api';
@@ -16,7 +16,7 @@ import { api } from '../api';
 export function BoardPage() {
   const { listId } = useParams();
   const navigate = useNavigate();
-  const { lists, tasksByList, refreshTasks, presence, user, updateTask, deleteTask, createTask, reorderTasks, setActiveList, deleteList } = useStore();
+  const { lists, tasksByList, refreshTasks, user, updateTask, deleteTask, createTask, reorderTasks, setActiveList, hideList } = useStore();
   const [filterOpen, setFilterOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [labelFilter, setLabelFilter] = useState('');
@@ -25,7 +25,6 @@ export function BoardPage() {
   const [selected, setSelected] = useState<TaskDto | null>(null);
   const [members, setMembers] = useState<{ userId: string; name: string; email: string; role: string }[]>([]);
   const [labels, setLabels] = useState<{ id: string; name: string; color: string }[]>([]);
-  const [confirmDelete, setConfirmDelete] = useState(false);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const list = lists.find((l) => l.id === listId);
@@ -87,31 +86,21 @@ export function BoardPage() {
     if (!selected) return;
     await deleteTask(selected.id);
     setSelected(null);
-    setConfirmDelete(false);
   };
 
   if (!list) return <Navigate to="/" replace />;
-
-  const activePresence = presence[list.id] || [];
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6 pb-24">
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <h1 className="text-2xl font-bold">{list.name}</h1>
-        {activePresence.length > 0 && (
-          <span className="chip bg-primary/10 text-primary">
-            {activePresence.filter((p) => p.userId !== user?.id).map((p) => p.name).join(', ') || 'Du'} gerade hier
-          </span>
-        )}
         <div className="ml-auto flex gap-2">
           <button className={`btn-quiet ${filterOpen ? 'border-primary text-primary' : ''}`} onClick={() => setFilterOpen((v) => !v)}>
             <Search className="h-4 w-4" /> Filter
           </button>
-          {canEdit && (
-            <button className="btn-danger btn-quiet !text-danger" onClick={() => setConfirmDelete(true)} title="Liste löschen">
-              <Trash2 className="h-4 w-4" />
-            </button>
-          )}
+          <button className="btn-quiet" onClick={() => { hideList(list.id); navigate('/'); }} title="Liste ausblenden">
+            <EyeOff className="h-4 w-4" />
+          </button>
         </div>
       </div>
 
@@ -178,15 +167,6 @@ export function BoardPage() {
         />
       )}
 
-      {confirmDelete && (
-        <Modal title="Liste löschen?" onClose={() => setConfirmDelete(false)}>
-          <p className="mb-4 text-sm text-muted">Die Liste „{list.name}“ und alle Aufgaben werden unwiderruflich gelöscht.</p>
-          <div className="flex justify-end gap-2">
-            <button className="btn-ghost" onClick={() => setConfirmDelete(false)}>Abbrechen</button>
-            <button className="btn-danger" onClick={async () => { await deleteList(list.id); navigate('/'); }}>Löschen</button>
-          </div>
-        </Modal>
-      )}
       {listId && listId.length > 0 && <span className="hidden">{list.memberRole}</span>}
     </div>
   );

@@ -1,27 +1,31 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, ListTodo } from 'lucide-react';
+import { ChevronRight, EyeOff, ListTodo } from 'lucide-react';
 import { useStore } from '../store';
 import { LIST_TYPE_INFO } from './listMeta';
 
 export function ListsPage() {
-  const { lists, tasksByList } = useStore();
+  const { lists, tasksByList, hiddenLists, unhideList } = useStore();
   const navigate = useNavigate();
+  const visibleLists = lists.filter((l) => !hiddenLists.includes(l.id));
+  const hidden = lists.filter((l) => hiddenLists.includes(l.id));
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-6 pb-28">
       <header className="mb-6">
         <h1 className="text-2xl font-bold">Meine Listen</h1>
-        <p className="text-sm text-muted">{lists.length} Liste{lists.length === 1 ? '' : 'n'}</p>
+        <p className="text-sm text-muted">{visibleLists.length} Liste{visibleLists.length === 1 ? '' : 'n'}</p>
       </header>
 
-      {lists.length === 0 ? (
+      {visibleLists.length === 0 ? (
         <div className="card p-8 text-center text-sm text-muted">
-          Noch keine Listen. Ein Administrator weist dir Listen zu – sie erscheinen dann hier.
+          {lists.length === 0
+            ? 'Noch keine Listen. Ein Administrator weist dir Listen zu – sie erscheinen dann hier.'
+            : 'Alle Listen sind ausgeblendet.'}
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
-          {lists.map((l) => {
+          {visibleLists.map((l) => {
             const tasks = tasksByList[l.id] || [];
             const done = tasks.filter((t) => t.status === 'done').length;
             const open = tasks.length - done;
@@ -31,7 +35,8 @@ export function ListsPage() {
               <button
                 key={l.id}
                 onClick={() => navigate(`/list/${l.id}`)}
-                className="card group flex flex-col gap-3 p-4 text-left transition-transform hover:-translate-y-0.5"
+                style={{ borderColor: l.color || type?.color || 'var(--c-primary)' }}
+                className="card group flex flex-col gap-3 p-4 text-left transition-shadow hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.4)]"
               >
                 <div className="flex items-center gap-3">
                   <div
@@ -55,6 +60,42 @@ export function ListsPage() {
             );
           })}
         </div>
+      )}
+
+      {hidden.length > 0 && (
+        <section className="mt-8">
+          <div className="mb-3 flex items-center gap-2">
+            <EyeOff className="h-4 w-4 text-muted" />
+            <h2 className="text-sm font-bold">Ausgeblendete Listen</h2>
+            <span className="text-xs text-muted">{hidden.length}</span>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {hidden.map((l) => {
+              const type = l.type ? LIST_TYPE_INFO[l.type] : undefined;
+              return (
+                <div key={l.id} className="card flex items-center gap-3 p-3">
+                  <div
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-theme text-base opacity-60"
+                    style={{ background: l.color || type?.color || 'var(--c-primary)', color: '#fff' }}
+                  >
+                    {type?.icon || <ListTodo className="h-4 w-4" />}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-medium">{l.name}</div>
+                    <div className="text-xs text-muted">{type ? type.label : 'Liste'}</div>
+                  </div>
+                  <button
+                    className="btn-ghost shrink-0 px-3 py-1.5 text-xs"
+                    onClick={() => unhideList(l.id)}
+                    title="Liste wieder anzeigen"
+                  >
+                    Einblenden
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </section>
       )}
     </div>
   );
