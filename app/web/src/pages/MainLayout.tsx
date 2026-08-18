@@ -94,8 +94,8 @@ export function MainLayout() {
           <Settings className="h-4 w-4 text-muted" />
           Einstellungen
         </NavLink>
-        <button onClick={() => void logout()} className="flex w-full items-center gap-2 rounded-theme px-2 py-2 text-left text-sm text-ink hover:bg-danger/10 hover:text-danger">
-          <LogOut className="h-4 w-4 text-danger/70" />
+        <button onClick={() => void logout()} className="group flex w-full items-center gap-2 rounded-theme px-2 py-2 text-left text-sm text-ink hover:!bg-danger/10 hover:!text-danger">
+          <LogOut className="h-4 w-4 text-danger/70 group-hover:!text-danger" />
           Abmelden
         </button>
       </div>
