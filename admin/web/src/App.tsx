@@ -5,6 +5,7 @@ import {
   ScrollText, Settings, LogOut, Shield
 } from 'lucide-react';
 import { api, setCsrf } from './api';
+import { getNatureBackground } from './natureBackgrounds';
 import { DashboardPage } from './pages/Dashboard';
 import { UsersPage } from './pages/Users';
 import { ListsPage } from './pages/Lists';
@@ -61,7 +62,12 @@ export default function App() {
   }
 
   if (!user) {
-    return <Login onSuccess={boot} appName={appName} />;
+    return (
+      <Routes>
+        <Route path="/login" element={<Login onSuccess={boot} appName={appName} />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    );
   }
 
   const nav = [
@@ -165,7 +171,7 @@ function Login({ onSuccess, appName }: { onSuccess: () => Promise<void>; appName
   const [busy, setBusy] = useState(false);
   const [bg, setBg] = useState<string | null>(null);
   useEffect(() => {
-    const url = `https://picsum.photos/1280/720?random=${Date.now()}`;
+    const url = getNatureBackground();
     const img = new Image();
     img.onload = () => setBg(url);
     img.src = url;

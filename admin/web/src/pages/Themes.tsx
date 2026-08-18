@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Star, Copy, Trash2, Download, Upload, Plus, RefreshCw, Sparkles } from 'lucide-react';
 import { api } from '../api';
+import { getNatureBackground } from '../natureBackgrounds';
 import { Modal } from './Users';
 
 export interface ThemeConfig {
@@ -32,7 +33,7 @@ function toVars(c: ThemeConfig): Record<string, string> {
 
 let previewBg: string | null = null;
 function getPreviewBackground(): string {
-  if (!previewBg) previewBg = `https://picsum.photos/1280/720?random=${Date.now()}`;
+  if (!previewBg) previewBg = getNatureBackground();
   return previewBg;
 }
 

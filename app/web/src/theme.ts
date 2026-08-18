@@ -1,3 +1,5 @@
+import { getNatureBackground } from './natureBackgrounds';
+
 export interface ThemeConfig {
   primary: string;
   accent: string;
@@ -37,7 +39,7 @@ export function toChannels(value: string): string {
 let sessionBg: string | null = null;
 
 export function getSessionBackground(): string {
-  if (!sessionBg) sessionBg = `https://picsum.photos/1280/720?random=${Date.now()}`;
+  if (!sessionBg) sessionBg = getNatureBackground();
   return sessionBg;
 }
 

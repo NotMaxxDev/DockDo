@@ -32,6 +32,7 @@ const PUBLIC_PATHS = ['/api/admin/login', '/health'];
 export function gateway(req: FastifyRequest, reply: FastifyReply): boolean {
   const url = (req.url || '').split('?')[0];
   if (PUBLIC_PATHS.includes(url)) return true;
+  if (!url.startsWith('/api/') && !url.startsWith('/_internal/')) return true;
   if (!req.user) {
     reply.status(401).send({ error: 'Nicht angemeldet' });
     return false;
