@@ -43,10 +43,11 @@ export function getSessionBackground(): string {
   return sessionBg;
 }
 
-export function applyTheme(config: ThemeConfig | null | undefined): void {
+export function applyTheme(config: ThemeConfig | null | undefined, accent?: string | null): void {
   const root = document.documentElement;
   if (!config) return;
-  root.style.setProperty('--c-primary', toChannels(config.primary) || '79 70 229');
+  const primary = isValidHex(accent || '') ? accent!.trim() : config.primary;
+  root.style.setProperty('--c-primary', toChannels(primary) || '79 70 229');
   root.style.setProperty('--c-accent', toChannels(config.accent) || '14 165 233');
   root.style.setProperty('--c-background', toChannels(config.background) || '248 250 252');
   root.style.setProperty('--c-surface', toChannels(config.surface) || '255 255 255');
@@ -58,8 +59,6 @@ export function applyTheme(config: ThemeConfig | null | undefined): void {
   root.style.setProperty('--c-warning', toChannels(config.warning) || '217 119 6');
   root.style.setProperty('--f-theme', FONT_STACKS[config.font || 'Inter'] || FONT_STACKS.Inter);
   root.style.setProperty('--r-theme', `${Math.max(0, Math.round(config.radius || 12))}px`);
-  root.style.setProperty('--s-theme', `${config.spacing || 1}px`);
-  root.style.setProperty('--tz-offset', '0');
   root.style.colorScheme = config.mode === 'dark' ? 'dark' : 'light';
   root.classList.toggle('dark', config.mode === 'dark');
   root.classList.toggle('glass', !!config.glass);
@@ -69,7 +68,7 @@ export function applyTheme(config: ThemeConfig | null | undefined): void {
     root.style.removeProperty('--app-bg');
   }
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', config.primary || '#4f46e5');
+  if (meta) meta.setAttribute('content', primary || '#4f46e5');
 }
 
 export function hexToRgb(hex: string): string {
@@ -77,4 +76,28 @@ export function hexToRgb(hex: string): string {
   const full = m.length === 3 ? m.split('').map((c) => c + c).join('') : m;
   const n = parseInt(full, 16);
   return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`;
+}
+
+export function isValidHex(value: string): boolean {
+  return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test((value || '').trim());
+}
+
+export function relativeLuminance(hex: string): number {
+  const m = hex.replace('#', '');
+  const full = m.length === 3 ? m.split('').map((c) => c + c).join('') : m;
+  const n = parseInt(full, 16);
+  const f = (v: number) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+  return (
+    0.2126 * f(((n >> 16) & 255) / 255) +
+    0.7152 * f(((n >> 8) & 255) / 255) +
+    0.0722 * f((n & 255) / 255)
+  );
+}
+
+export function contrastRatio(hex1: string, hex2: string): number {
+  const l1 = relativeLuminance(hex1);
+  const l2 = relativeLuminance(hex2);
+  const hi = Math.max(l1, l2);
+  const lo = Math.min(l1, l2);
+  return (hi + 0.05) / (lo + 0.05);
 }

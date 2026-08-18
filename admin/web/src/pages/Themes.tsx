@@ -17,10 +17,10 @@ interface ThemeRow {
 }
 
 const DEFAULT_CONFIG: ThemeConfig = {
-  primary: '#4f46e5', accent: '#0ea5e9', background: '#f8fafc', surface: '#ffffff',
-  text: '#0f172a', muted: '#64748b', border: '#e2e8f0',
-  success: '#16a34a', danger: '#dc2626', warning: '#d97706',
-  font: 'Inter', radius: 12, spacing: 1, mode: 'light', glass: false
+  primary: '#6366f1', accent: '#38bdf8', background: '#060b18', surface: '#0d1526',
+  text: '#e5edf7', muted: '#94a3b8', border: '#1c2a44',
+  success: '#34d399', danger: '#f87171', warning: '#fbbf24',
+  font: 'Inter', radius: 12, spacing: 1, mode: 'dark', glass: false
 };
 
 function toVars(c: ThemeConfig): Record<string, string> {

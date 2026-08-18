@@ -190,7 +190,7 @@ function TaskRow({ task, canEdit, onOpen, onToggle }: { task: TaskDto; canEdit: 
         checked={task.status === 'done'}
         onChange={onToggle}
         disabled={!canEdit}
-        className="h-4 w-4 accent-[var(--c-primary)]"
+        className="h-4 w-4 accent-[rgb(var(--c-primary))]"
         onClick={(e) => e.stopPropagation()}
       />
       <div className="min-w-0 flex-1">
@@ -388,7 +388,7 @@ export function TaskDetail({ task, canEdit, members, labels, onClose, onChanged,
           <div className="space-y-1.5">
             {task.subtasks.map((s) => (
               <label key={s.id} className="flex items-center gap-2 text-sm">
-                <input type="checkbox" checked={s.done} disabled={!canEdit} onChange={() => onToggleSub(s.id, !s.done)} className="h-4 w-4 accent-[var(--c-primary)]" />
+                <input type="checkbox" checked={s.done} disabled={!canEdit} onChange={() => onToggleSub(s.id, !s.done)} className="h-4 w-4 accent-[rgb(var(--c-primary))]" />
                 <span className={s.done ? 'line-through text-muted' : ''}>{s.title}</span>
               </label>
             ))}

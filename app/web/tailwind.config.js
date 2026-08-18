@@ -21,9 +21,6 @@ module.exports = {
       borderRadius: {
         theme: 'var(--r-theme)'
       },
-      spacing: {
-        theme: 'var(--s-theme)'
-      },
       fontFamily: {
         theme: 'var(--f-theme), ui-sans-serif, system-ui, sans-serif'
       }

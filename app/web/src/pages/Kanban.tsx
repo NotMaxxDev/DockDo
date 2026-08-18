@@ -34,7 +34,7 @@ function listAccentColor(id: string): string {
 }
 
 const COLUMNS: { id: ColumnStatus; title: string; hint: string; dot: string; tint: string; chipText: string; badge: string }[] = [
-  { id: 'todo', title: 'Aufgabenpool', hint: 'Noch keinem Status zugeordnet', dot: '#60a5fa', tint: 'bg-blue-500/5', chipText: 'text-blue-400', badge: 'text-blue-300' },
+  { id: 'todo', title: 'Aufgabenpool', hint: 'Noch keinem Status zugeordnet', dot: 'rgb(var(--c-primary))', tint: 'bg-blue-500/5', chipText: 'text-blue-400', badge: 'text-blue-300' },
   { id: 'in_progress', title: 'In Bearbeitung', hint: 'Aktuell laufend', dot: '#fbbf24', tint: 'bg-amber-500/5', chipText: 'text-amber-400', badge: 'text-amber-300' },
   { id: 'deferred', title: 'Verschoben / Frist gesetzt', hint: 'Zurückgestellt oder neue Frist', dot: '#a78bfa', tint: 'bg-violet-500/5', chipText: 'text-violet-400', badge: 'text-violet-300' },
   { id: 'done', title: 'Erledigt', hint: 'Abgeschlossen', dot: '#34d399', tint: 'bg-emerald-500/5', chipText: 'text-emerald-400', badge: 'text-emerald-300' }
@@ -331,7 +331,7 @@ function Column({ col, items, onOpen, onToggleDone }: {
   return (
     <div
       ref={setNodeRef}
-      className={`flex w-[min(88vw,320px)] shrink-0 flex-col rounded-theme border border-line bg-surface/60 transition-colors lg:w-auto lg:flex-1 lg:shrink ${isOver ? 'ring-2 ring-[var(--c-primary)]/40' : ''}`}
+      className={`flex w-[min(88vw,320px)] shrink-0 flex-col rounded-theme border border-line bg-surface/60 transition-colors lg:w-auto lg:flex-1 lg:shrink ${isOver ? 'ring-2 ring-primary/40' : ''}`}
       style={{ minHeight: 160 }}
     >
       <div className={`flex items-center gap-2 border-b border-line px-3 py-3 ${col.tint}`}>
@@ -366,7 +366,7 @@ function KanbanCard({ task, onOpen, onToggleDone }: { task: TaskDto & { listName
       style={{ transform: CSS.Translate.toString(transform), borderLeft: `3px solid ${done ? 'rgba(148,163,184,0.4)' : task.listAccent}` }}
       {...attributes}
       {...listeners}
-      className={`card group min-h-[76px] cursor-grab select-none p-3 active:cursor-grabbing ${done ? 'opacity-60 saturate-50' : ''} ${isDragging ? 'opacity-40 ring-2 ring-[var(--c-primary)]/50' : ''}`}
+      className={`card group min-h-[76px] cursor-grab select-none p-3 active:cursor-grabbing ${done ? 'opacity-60 saturate-50' : ''} ${isDragging ? 'opacity-40 ring-2 ring-primary/50' : ''}`}
       onClick={onOpen}
     >
       <div className="mb-1 flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted">

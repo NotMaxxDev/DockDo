@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useStore } from '../store';
 import { api } from '../api';
+import { contrastRatio, isValidHex } from '../theme';
+
+const ACCENT_SWATCHES = ['#6366f1', '#38bdf8', '#0ea5e9', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316', '#fbbf24', '#22c55e', '#14b8a6', '#5e81ac', '#88c0d0'];
 
 declare global {
   interface Window {
@@ -10,7 +13,7 @@ declare global {
 }
 
 export function SettingsPage() {
-  const { user, meta, selectTheme, updateUserLocally, refreshMe } = useStore();
+  const { user, meta, selectTheme, updateUserLocally, refreshMe, accent, setAccent } = useStore();
   const [sessions, setSessions] = useState<{ id: string; ip: string | null; userAgent: string | null; lastSeenAt: string; current?: boolean }[]>([]);
   const [locale, setLocale] = useState(user?.locale || 'de');
   const [timezone, setTimezone] = useState(user?.timezone || 'UTC');
@@ -136,6 +139,18 @@ export function SettingsPage() {
     setSessions((prev) => prev.filter((s) => s.id !== id));
   };
 
+  const currentTheme = meta?.themes.find((t) => t.id === user.themeId) || meta?.defaultTheme;
+  const themeConfig = currentTheme?.config;
+  const activeAccent = isValidHex(accent) ? accent : (themeConfig?.primary || '');
+  const currentRatio = activeAccent && themeConfig?.background ? contrastRatio(activeAccent, themeConfig.background) : 0;
+  const contrastWarn = currentRatio > 0 && currentRatio < 4.5;
+  const pickerValue = isValidHex(accent) ? accent : (themeConfig?.primary || '#6366f1');
+
+  const onHexInput = (v: string) => {
+    const raw = v.trim();
+    setAccent(raw && !raw.startsWith('#') ? `#${raw}` : raw);
+  };
+
   return (
     <div className="mx-auto max-w-2xl space-y-6 px-4 py-6">
       <h1 className="text-2xl font-bold">Einstellungen</h1>
@@ -152,22 +167,76 @@ export function SettingsPage() {
 
       <section className="card p-5">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">Erscheinungsbild</h2>
-        <div className="flex flex-wrap gap-2">
-          {meta?.themes.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => void selectTheme(t.id)}
-              className={`card flex items-center gap-3 p-3 transition-colors ${user.themeId === t.id ? 'border-primary ring-2 ring-primary/30' : 'hover:border-primary/50'}`}
-            >
-              <span className="flex gap-1">
-                <span className="h-4 w-4 rounded-full" style={{ background: t.config.primary }} />
-                <span className="h-4 w-4 rounded-full" style={{ background: t.config.accent }} />
-                <span className="h-4 w-4 rounded-full border border-line" style={{ background: t.config.surface }} />
-              </span>
-              <span className="text-sm font-medium">{t.name}</span>
-            </button>
-          ))}
-          {(!meta?.themes || meta.themes.length === 0) && <div className="text-sm text-muted">Keine Themes verfügbar.</div>}
+
+        <div className="mb-5">
+          <span className="label">Theme</span>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {meta?.themes.map((t) => {
+              const active = user.themeId === t.id;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => void selectTheme(t.id)}
+                  className={`card flex flex-col gap-2 p-3 text-left transition-colors ${active ? 'border-primary ring-2 ring-primary/30' : 'hover:border-primary/50'}`}
+                >
+                  <span className="flex gap-1">
+                    <span className="h-4 w-4 rounded-full" style={{ background: t.config.primary }} />
+                    <span className="h-4 w-4 rounded-full" style={{ background: t.config.accent }} />
+                    <span className="h-4 w-4 rounded-full border border-line" style={{ background: t.config.surface }} />
+                  </span>
+                  <span className="flex items-center gap-1 text-sm font-medium">
+                    {t.name}
+                    {active && <span className="text-primary">✓</span>}
+                  </span>
+                </button>
+              );
+            })}
+            {(!meta?.themes || meta.themes.length === 0) && <div className="text-sm text-muted">Keine Themes verfügbar.</div>}
+          </div>
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between">
+            <span className="label">Akzentfarbe</span>
+            {accent && <button className="text-xs text-muted hover:text-ink" onClick={() => setAccent('')}>Zurücksetzen</button>}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {ACCENT_SWATCHES.map((c) => (
+              <button
+                key={c}
+                onClick={() => setAccent(c)}
+                aria-label={`Akzent ${c}`}
+                className={`h-7 w-7 rounded-full transition-transform ${accent.toLowerCase() === c.toLowerCase() ? 'scale-110 ring-2 ring-primary ring-offset-2 ring-offset-surface' : 'hover:scale-110'}`}
+                style={{ background: c }}
+              />
+            ))}
+            <label className="relative h-7 w-7 cursor-pointer overflow-hidden rounded-full border border-line" title="Eigene Farbe wählen">
+              <input
+                type="color"
+                className="absolute -inset-1 h-12 w-12 cursor-pointer opacity-0"
+                value={pickerValue}
+                onChange={(e) => setAccent(e.target.value)}
+              />
+              <span className="flex h-full w-full items-center justify-center text-sm font-bold text-muted">+</span>
+            </label>
+            <input
+              className="input w-32"
+              value={accent}
+              placeholder={themeConfig?.primary || '#6366f1'}
+              onChange={(e) => onHexInput(e.target.value)}
+            />
+          </div>
+          {contrastWarn && (
+            <p className="mt-2 text-xs text-warn">
+              Die Akzentfarbe hat wenig Kontrast zum Hintergrund dieses Themes – sie ist dort möglicherweise schwer erkennbar.
+            </p>
+          )}
+          {!contrastWarn && currentRatio > 0 && (
+            <p className="mt-2 text-xs text-muted">Kontrast zum Hintergrund: {currentRatio.toFixed(2)}:1</p>
+          )}
+          <p className="mt-1 text-xs text-muted">
+            Die Akzentfarbe überschreibt die Standard-Akzentfarbe des Themes (aktive Menüpunkte, Buttons, Links, Badges) und wird lokal auf diesem Gerät gespeichert.
+          </p>
         </div>
       </section>
 

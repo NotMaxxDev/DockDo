@@ -73,12 +73,12 @@ export function MainLayout() {
             key={l.id}
             to={`/list/${l.id}`}
             onClick={() => setDrawer(false)}
-            style={{ borderColor: l.color || 'var(--c-primary)' }}
+            style={{ borderColor: l.color || 'rgb(var(--c-primary))' }}
             className={({ isActive }) =>
               `flex items-center gap-2 rounded-theme border px-3 py-2 text-sm transition-colors ${isActive ? 'bg-primary/10 font-semibold text-primary' : 'text-ink hover:bg-bg'}`
             }
           >
-            <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: l.color || 'var(--c-primary)' }} />
+            <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: l.color || 'rgb(var(--c-primary))' }} />
             <span className="flex-1 truncate">{l.name}</span>
             {l.memberRole === 'viewer' && <span className="text-[10px] uppercase text-muted">Ro</span>}
           </NavLink>
@@ -94,7 +94,7 @@ export function MainLayout() {
           <Settings className="h-4 w-4 text-muted" />
           Einstellungen
         </NavLink>
-        <button onClick={() => void logout()} className="group flex w-full items-center gap-2 rounded-theme px-2 py-2 text-left text-sm text-ink hover:!bg-danger/10 hover:!text-danger">
+        <button onClick={() => void logout()} className="logout-btn group flex w-full items-center gap-2 rounded-theme px-2 py-2 text-left text-sm text-ink hover:!bg-danger/10 hover:!text-danger">
           <LogOut className="h-4 w-4 text-danger/70 group-hover:!text-danger" />
           Abmelden
         </button>

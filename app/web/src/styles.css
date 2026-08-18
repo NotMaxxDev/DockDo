@@ -15,7 +15,6 @@
   --c-warning: 251 191 36;
   --f-theme: Inter, ui-sans-serif, system-ui, sans-serif;
   --r-theme: 12px;
-  --s-theme: 1px;
   color-scheme: dark;
 }
 
@@ -367,4 +366,14 @@ body {
 }
 .glass .hover\:bg-bg:hover {
   background-color: rgb(255 255 255 / 0.08);
+}
+
+.logout-btn:hover,
+.logout-btn:focus-visible {
+  background-color: rgb(var(--c-danger) / 0.1) !important;
+  color: rgb(var(--c-danger)) !important;
+}
+.logout-btn:hover svg,
+.logout-btn:focus-visible svg {
+  color: rgb(var(--c-danger)) !important;
 }

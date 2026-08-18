@@ -35,13 +35,13 @@ export function ListsPage() {
               <button
                 key={l.id}
                 onClick={() => navigate(`/list/${l.id}`)}
-                style={{ borderColor: l.color || type?.color || 'var(--c-primary)' }}
+                style={{ borderColor: l.color || type?.color || 'rgb(var(--c-primary))' }}
                 className="card group flex flex-col gap-3 p-4 text-left transition-shadow hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.4)]"
               >
                 <div className="flex items-center gap-3">
                   <div
                     className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme text-lg"
-                    style={{ background: l.color || type?.color || 'var(--c-primary)', color: '#fff' }}
+                    style={{ background: l.color || type?.color || 'rgb(var(--c-primary))', color: '#fff' }}
                   >
                     {type?.icon || <ListTodo className="h-5 w-5" />}
                   </div>
@@ -54,7 +54,7 @@ export function ListsPage() {
                   <ChevronRight className="h-4 w-4 text-muted transition-transform group-hover:translate-x-0.5" />
                 </div>
                 <div className="h-1.5 overflow-hidden rounded-full bg-bg">
-                  <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: l.color || type?.color || 'var(--c-primary)' }} />
+                  <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: l.color || type?.color || 'rgb(var(--c-primary))' }} />
                 </div>
               </button>
             );
@@ -76,7 +76,7 @@ export function ListsPage() {
                 <div key={l.id} className="card flex items-center gap-3 p-3">
                   <div
                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-theme text-base opacity-60"
-                    style={{ background: l.color || type?.color || 'var(--c-primary)', color: '#fff' }}
+                    style={{ background: l.color || type?.color || 'rgb(var(--c-primary))', color: '#fff' }}
                   >
                     {type?.icon || <ListTodo className="h-4 w-4" />}
                   </div>

@@ -34,6 +34,8 @@ interface StoreState {
   setActiveList: (id: string | null) => void;
   selectTheme: (themeId: string) => Promise<void>;
   updateUserLocally: (user: UserDto) => void;
+  accent: string;
+  setAccent: (hex: string) => void;
 }
 
 const Ctx = createContext<StoreState>(null as never);
@@ -57,18 +59,28 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [online, setOnline] = useState(true);
   const [loading, setLoading] = useState(true);
   const [bootstrapped, setBootstrapped] = useState(false);
+  const [accent, setAccentState] = useState<string>(() => {
+    try {
+      return localStorage.getItem('dockdo.accent') || '';
+    } catch {
+      return '';
+    }
+  });
   const userRef = useRef<UserDto | null>(null);
   userRef.current = user;
+  const accentRef = useRef(accent);
+  accentRef.current = accent;
 
   const applyUserTheme = useCallback((userDto: UserDto | null, themes: ThemeMeta[], defaultConfig: ThemeConfig | undefined) => {
+    const accentOverride = accentRef.current || undefined;
     if (userDto?.themeId) {
       const t = themes.find((x) => x.id === userDto.themeId);
       if (t) {
-        applyTheme(t.config);
+        applyTheme(t.config, accentOverride);
         return;
       }
     }
-    applyTheme(defaultConfig);
+    applyTheme(defaultConfig, accentOverride);
   }, []);
 
   const refreshMe = useCallback(async () => {
@@ -285,14 +297,26 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setUser(u);
   }, []);
 
+  const setAccent = useCallback((hex: string) => {
+    const v = (hex || '').trim();
+    setAccentState(v);
+    try {
+      if (v) localStorage.setItem('dockdo.accent', v);
+      else localStorage.removeItem('dockdo.accent');
+    } catch {
+      /* ignore */
+    }
+    if (meta) applyUserTheme(userRef.current, meta.themes, meta.defaultTheme.config);
+  }, [meta, applyUserTheme]);
+
   const value = useMemo<StoreState>(() => ({
     meta, user, csrf, lists, tasksByList, activeListId, presence, online, loading, bootstrapped,
     login, completeTotp, logout, refreshMe, refreshLists, refreshTasks,
     updateList, deleteList, hiddenLists, hideList, unhideList, createTask, updateTask, deleteTask, reorderTasks,
-    setActiveList: setActiveListId, selectTheme, updateUserLocally
+    setActiveList: setActiveListId, selectTheme, updateUserLocally, accent, setAccent
   }), [meta, user, csrf, lists, tasksByList, activeListId, presence, online, loading, bootstrapped,
     login, completeTotp, logout, refreshMe, refreshLists, refreshTasks,
-    updateList, deleteList, hiddenLists, hideList, unhideList, createTask, updateTask, deleteTask, reorderTasks, selectTheme, updateUserLocally]);
+    updateList, deleteList, hiddenLists, hideList, unhideList, createTask, updateTask, deleteTask, reorderTasks, selectTheme, updateUserLocally, accent, setAccent]);
 
   useEffect(() => {
     if (!navigator.serviceWorker) return;

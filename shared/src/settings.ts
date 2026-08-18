@@ -210,22 +210,29 @@ export async function publishSyncEvent(type: string, payload?: Record<string, un
 }
 
 export async function createDefaultThemeIfMissing(): Promise<string> {
-  const existing = await dbTyped().select().from(themes).limit(1);
-  if (existing.length > 0) {
-    const t = existing[0];
-    if (t.isDefault && isUnchangedDefaultTheme(t.config as ThemeConfig)) {
+  const existing = await dbTyped().select().from(themes);
+  const defaultTheme = existing.find((t) => t.isDefault);
+  if (defaultTheme) {
+    if (isUnchangedDefaultTheme(defaultTheme.config as ThemeConfig)) {
       await dbTyped()
         .update(themes)
         .set({ config: defaultThemeConfig(), updatedAt: nowIso() })
-        .where(eq(themes.id, t.id));
-      return t.id;
+        .where(eq(themes.id, defaultTheme.id));
     }
-    return t.id;
+    return defaultTheme.id;
+  }
+  const dunkel = existing.find((t) => t.name === 'Dunkel');
+  if (dunkel) {
+    await dbTyped()
+      .update(themes)
+      .set({ isDefault: true, updatedAt: nowIso() })
+      .where(eq(themes.id, dunkel.id));
+    return dunkel.id;
   }
   const id = uuid();
   await dbTyped().insert(themes).values({
     id,
-    name: 'DockDo Standard',
+    name: 'Dunkel',
     isDefault: true,
     enabled: true,
     config: defaultThemeConfig(),
@@ -256,13 +263,25 @@ export function defaultThemeConfig(): ThemeConfig {
 }
 
 export interface ThemePreset {
+  key: string;
   name: string;
   config: ThemeConfig;
 }
 
 export const PRESET_THEMES: ThemePreset[] = [
   {
-    name: 'Dock Nacht',
+    key: 'hell',
+    name: 'Hell',
+    config: {
+      primary: '#4f46e5', accent: '#0ea5e9', background: '#f6f8fc', surface: '#ffffff',
+      text: '#0f172a', muted: '#64748b', border: '#e2e8f0',
+      success: '#16a34a', danger: '#dc2626', warning: '#d97706',
+      font: 'Inter', radius: 12, spacing: 1, mode: 'light', glass: false
+    }
+  },
+  {
+    key: 'dunkel',
+    name: 'Dunkel',
     config: {
       primary: '#6366f1', accent: '#38bdf8', background: '#060b18', surface: '#0d1526',
       text: '#e5edf7', muted: '#94a3b8', border: '#1c2a44',
@@ -271,77 +290,34 @@ export const PRESET_THEMES: ThemePreset[] = [
     }
   },
   {
-    name: 'Heller Hafen',
+    key: 'nord',
+    name: 'Nord',
     config: {
-      primary: '#4f46e5', accent: '#0ea5e9', background: '#f4f6fb', surface: '#ffffff',
-      text: '#0f172a', muted: '#64748b', border: '#e2e8f0',
-      success: '#16a34a', danger: '#dc2626', warning: '#d97706',
-      font: 'Inter', radius: 12, spacing: 1, mode: 'light', glass: false
-    }
-  },
-  {
-    name: 'Meeresbriese',
-    config: {
-      primary: '#0891b2', accent: '#22d3ee', background: '#f0f9fb', surface: '#ffffff',
-      text: '#164e63', muted: '#5f7d8c', border: '#c9e3ea',
-      success: '#059669', danger: '#e11d48', warning: '#d97706',
-      font: 'Inter', radius: 14, spacing: 1, mode: 'light', glass: false
-    }
-  },
-  {
-    name: 'Mondlicht',
-    config: {
-      primary: '#a78bfa', accent: '#e879f9', background: '#0d0a1a', surface: '#161129',
-      text: '#ece8f7', muted: '#9c94b8', border: '#2a2350',
-      success: '#34d399', danger: '#fb7185', warning: '#fbbf24',
-      font: 'Inter', radius: 16, spacing: 1, mode: 'dark', glass: false
-    }
-  },
-  {
-    name: 'Sonnenuntergang',
-    config: {
-      primary: '#f97316', accent: '#f43f5e', background: '#150c0a', surface: '#211411',
-      text: '#fdeee5', muted: '#b5968a', border: '#3a241d',
-      success: '#4ade80', danger: '#fb7185', warning: '#facc15',
+      primary: '#5e81ac', accent: '#88c0d0', background: '#2e3440', surface: '#3b4252',
+      text: '#eceff4', muted: '#d8dee9', border: '#434c5e',
+      success: '#a3be8c', danger: '#bf616a', warning: '#d08770',
       font: 'Inter', radius: 12, spacing: 1, mode: 'dark', glass: false
-    }
-  },
-  {
-    name: 'Ozean',
-    config: {
-      primary: '#14b8a6', accent: '#2dd4bf', background: '#06120f', surface: '#0d201b',
-      text: '#e2f5f0', muted: '#8fb8ae', border: '#1d4238',
-      success: '#34d399', danger: '#fb7185', warning: '#fbbf24',
-      font: 'Inter', radius: 12, spacing: 1, mode: 'dark', glass: false
-    }
-  },
-  {
-    name: 'Viral Glass',
-    config: {
-      primary: '#8b5cf6', accent: '#22d3ee', background: '#0b0f1e', surface: '#141a30',
-      text: '#eef2ff', muted: '#8b95b8', border: '#2a3352',
-      success: '#34d399', danger: '#fb7185', warning: '#fbbf24',
-      font: 'Inter', radius: 18, spacing: 1, mode: 'dark', glass: true
     }
   }
 ];
 
+const SHIPPED_THEME_NAMES = ['DockDo Standard', 'Dock Nacht', 'Heller Hafen', 'Meeresbriese', 'Mondlicht', 'Sonnenuntergang', 'Ozean', 'Viral Glass'];
+
 export async function seedPresetThemes(): Promise<void> {
-  const existing = await dbTyped().select({ id: themes.id, name: themes.name }).from(themes);
-  const byName = new Map<string, string[]>();
-  for (const t of existing) {
-    const arr = byName.get(t.name) || [];
-    arr.push(t.id);
-    byName.set(t.name, arr);
+  const existing = await dbTyped().select().from(themes);
+  const presetNames = new Set(PRESET_THEMES.map((p) => p.name));
+
+  const toDelete = existing
+    .filter((t) => SHIPPED_THEME_NAMES.includes(t.name) && !presetNames.has(t.name))
+    .map((t) => t.id);
+  if (toDelete.length > 0) {
+    await dbTyped().delete(themes).where(inArray(themes.id, toDelete));
   }
-  for (const ids of byName.values()) {
-    if (ids.length > 1) {
-      await dbTyped().delete(themes).where(inArray(themes.id, ids.slice(1)));
-    }
-  }
-  const names = new Set(byName.keys());
+
+  const kept = existing.filter((t) => !toDelete.includes(t.id));
+  const byName = new Map(kept.map((t) => [t.name, t]));
   for (const preset of PRESET_THEMES) {
-    if (names.has(preset.name)) continue;
+    if (byName.has(preset.name)) continue;
     await dbTyped().insert(themes).values({
       id: uuid(),
       name: preset.name,
@@ -351,6 +327,28 @@ export async function seedPresetThemes(): Promise<void> {
       createdAt: nowIso(),
       updatedAt: nowIso()
     });
+  }
+
+  const after = await dbTyped().select().from(themes);
+  const defaults = after.filter((t) => t.isDefault);
+  if (defaults.length === 0) {
+    const dunkel = after.find((t) => t.name === 'Dunkel') || after[0];
+    if (dunkel) {
+      await dbTyped()
+        .update(themes)
+        .set({ isDefault: true, updatedAt: nowIso() })
+        .where(eq(themes.id, dunkel.id));
+    }
+  } else if (defaults.length > 1) {
+    const keep = defaults.find((t) => t.name === 'Dunkel') || defaults[0];
+    for (const t of defaults) {
+      if (t.id !== keep.id) {
+        await dbTyped()
+          .update(themes)
+          .set({ isDefault: false, updatedAt: nowIso() })
+          .where(eq(themes.id, t.id));
+      }
+    }
   }
 }
 

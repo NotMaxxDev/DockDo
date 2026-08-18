@@ -42,7 +42,7 @@ export function DashboardPage() {
                   className="flex w-full items-center gap-2 rounded-theme px-2 py-1.5 text-left text-sm transition-colors hover:bg-bg"
                   onClick={() => navigate(`/list/${t.listId}`)}
                 >
-                  <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: t.listColor || 'var(--c-primary)' }} />
+                  <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: t.listColor || 'rgb(var(--c-primary))' }} />
                   <span className="truncate">{t.title}</span>
                   <span className="ml-auto shrink-0 text-xs text-danger">{new Date(t.dueDate!).toLocaleDateString('de-DE')}</span>
                 </button>
@@ -69,7 +69,7 @@ export function DashboardPage() {
                     className="flex w-full items-center gap-2 rounded-theme px-2 py-1.5 text-left text-sm transition-colors hover:bg-bg"
                     onClick={() => navigate(`/list/${t.listId}`)}
                   >
-                    <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: t.listColor || 'var(--c-primary)' }} />
+                    <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: t.listColor || 'rgb(var(--c-primary))' }} />
                     <span className="truncate">{t.title}</span>
                     <span className="ml-auto flex shrink-0 items-center gap-2">
                       {t.priority !== 'medium' && (
@@ -115,13 +115,13 @@ export function DashboardPage() {
                 <button
                   key={l.id}
                   onClick={() => navigate(`/list/${l.id}`)}
-                  style={{ borderColor: l.color || type?.color || 'var(--c-primary)' }}
+                  style={{ borderColor: l.color || type?.color || 'rgb(var(--c-primary))' }}
                   className="card group flex flex-col gap-3 p-4 text-left transition-shadow hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.4)]"
                 >
                   <div className="flex items-center gap-3">
                     <div
                       className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme text-lg"
-                      style={{ background: l.color || type?.color || 'var(--c-primary)', color: '#fff' }}
+                      style={{ background: l.color || type?.color || 'rgb(var(--c-primary))', color: '#fff' }}
                     >
                       {type?.icon || <ListTodo className="h-5 w-5" />}
                     </div>
@@ -134,7 +134,7 @@ export function DashboardPage() {
                     <ChevronRight className="h-4 w-4 text-muted transition-transform group-hover:translate-x-0.5" />
                   </div>
                   <div className="h-1.5 overflow-hidden rounded-full bg-bg">
-                    <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: l.color || type?.color || 'var(--c-primary)' }} />
+                    <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: l.color || type?.color || 'rgb(var(--c-primary))' }} />
                   </div>
                 </button>
               );
