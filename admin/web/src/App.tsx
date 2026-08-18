@@ -122,7 +122,7 @@ export default function App() {
                     </div>
                   </div>
                 </div>
-                <button onClick={() => void logout()} className="btn-quiet w-full justify-start px-3">
+                <button onClick={() => void logout()} className="btn-quiet w-full justify-start px-3 hover:!bg-danger/10 hover:!text-danger">
                   <LogOut className="h-4 w-4" /> Abmelden
                 </button>
               </div>

@@ -26,6 +26,7 @@ const de: Record<string, string> = {
   'task.status': 'Status',
   'task.status.todo': 'Offen',
   'task.status.in_progress': 'In Arbeit',
+  'task.status.deferred': 'Verschoben',
   'task.status.done': 'Erledigt',
   'task.status.cancelled': 'Abgebrochen',
   'task.labels': 'Labels',

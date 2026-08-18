@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate, NavLink } from 'react-router-dom';
-import { Settings, LogOut, Search, Menu, X, LayoutDashboard, ListTodo } from 'lucide-react';
+import { Settings, LogOut, Search, Menu, X, LayoutDashboard, ListTodo, KanbanSquare } from 'lucide-react';
 import { useStore } from '../store';
 
 const isApp = typeof window !== 'undefined' && typeof window.DockDoBridge !== 'undefined';
@@ -19,6 +19,7 @@ export function MainLayout() {
 
   const tabs = [
     { to: '/', label: 'Übersicht', icon: LayoutDashboard, end: true },
+    { to: '/board', label: 'Board', icon: KanbanSquare, end: false },
     { to: '/lists', label: 'Listen', icon: ListTodo, end: false },
     { to: '/search', label: 'Suche', icon: Search, end: false },
     { to: '/settings', label: 'Einstellungen', icon: Settings, end: false }
@@ -56,6 +57,16 @@ export function MainLayout() {
         >
           <LayoutDashboard className="h-4 w-4 text-muted" />
           Übersicht
+        </NavLink>
+        <NavLink
+          to="/board"
+          onClick={() => setDrawer(false)}
+          className={({ isActive }) =>
+            `flex items-center gap-2 rounded-theme px-3 py-2 text-sm transition-colors ${isActive ? 'bg-primary/10 font-semibold text-primary' : 'text-ink hover:bg-bg'}`
+          }
+        >
+          <KanbanSquare className="h-4 w-4 text-muted" />
+          Board
         </NavLink>
         {visibleLists.map((l) => (
           <NavLink

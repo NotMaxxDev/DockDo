@@ -5,7 +5,7 @@ export interface TaskDto {
   description: string;
   dueDate: string | null;
   priority: 'low' | 'medium' | 'high';
-  status: 'todo' | 'in_progress' | 'done' | 'cancelled';
+  status: 'todo' | 'in_progress' | 'deferred' | 'done' | 'cancelled';
   sortOrder: number;
   assigneeId: string | null;
   recurrence: unknown | null;

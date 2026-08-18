@@ -110,7 +110,7 @@ export const tasks = sqliteTable('tasks', {
   description: text('description').notNull().default(''),
   dueDate: text('due_date'),
   priority: text('priority', { enum: ['low', 'medium', 'high'] }).notNull().default('medium'),
-  status: text('status', { enum: ['todo', 'in_progress', 'done', 'cancelled'] }).notNull().default('todo'),
+  status: text('status', { enum: ['todo', 'in_progress', 'deferred', 'done', 'cancelled'] }).notNull().default('todo'),
   sortOrder: real('sort_order').notNull().default(0),
   assigneeId: text('assignee_id'),
   recurrence: text('recurrence', { mode: 'json' }).$type<RecurrenceRule | null>().default(null),
@@ -123,7 +123,7 @@ export const tasks = sqliteTable('tasks', {
 });
 
 export type Task = typeof tasks.$inferSelect;
-export type TaskStatus = 'todo' | 'in_progress' | 'done' | 'cancelled';
+export type TaskStatus = 'todo' | 'in_progress' | 'deferred' | 'done' | 'cancelled';
 export type Priority = 'low' | 'medium' | 'high';
 
 export interface RecurrenceRule {

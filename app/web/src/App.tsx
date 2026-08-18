@@ -7,6 +7,7 @@ import { MainLayout } from './pages/MainLayout';
 import { DashboardPage } from './pages/Dashboard';
 import { ListsPage } from './pages/Lists';
 import { BoardPage } from './pages/Board';
+import { KanbanPage } from './pages/Kanban';
 import { SettingsPage } from './pages/Settings';
 import { SearchPage } from './pages/Search';
 import { LaunchScreen, useInstallCheck } from './LaunchScreen';
@@ -49,6 +50,7 @@ export default function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/" element={user ? <MainLayout /> : <Navigate to="/login" replace />}>
           <Route index element={<DashboardPage />} />
+          <Route path="board" element={<KanbanPage />} />
           <Route path="lists" element={<ListsPage />} />
           <Route path="list/:listId" element={<BoardPage />} />
           <Route path="search" element={<SearchPage />} />

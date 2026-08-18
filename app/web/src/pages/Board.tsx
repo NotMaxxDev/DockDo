@@ -112,6 +112,7 @@ export function BoardPage() {
               <option value="all">Alle</option>
               <option value="todo">Offen</option>
               <option value="in_progress">In Arbeit</option>
+              <option value="deferred">Verschoben</option>
               <option value="done">Erledigt</option>
               <option value="cancelled">Abgebrochen</option>
             </select>
@@ -236,7 +237,7 @@ function TaskRow({ task, canEdit, onOpen, onToggle }: { task: TaskDto; canEdit: 
   );
 }
 
-function TaskDetail({ task, canEdit, members, labels, onClose, onChanged, onDelete, onToggleSub }: {
+export function TaskDetail({ task, canEdit, members, labels, onClose, onChanged, onDelete, onToggleSub }: {
   task: TaskDto;
   canEdit: boolean;
   members: { userId: string; name: string; email: string; role: string }[];
@@ -314,6 +315,7 @@ function TaskDetail({ task, canEdit, members, labels, onClose, onChanged, onDele
             <select className="input" value={status} onChange={(e) => setStatus(e.target.value as typeof status)} disabled={!canEdit}>
               <option value="todo">Offen</option>
               <option value="in_progress">In Arbeit</option>
+              <option value="deferred">Verschoben</option>
               <option value="done">Erledigt</option>
               <option value="cancelled">Abgebrochen</option>
             </select>

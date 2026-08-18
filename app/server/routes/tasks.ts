@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { and, eq, sql } from 'drizzle-orm';
 import {
-  getDb, tasks, subtasks, taskLabels, labels, users, listMembers,
+  getDb, tasks, subtasks, taskLabels, labels, users, listMembers, lists,
   audit, nowIso, uuid, publishSyncEvent,
   type TaskStatus, type Priority, type RecurrenceRule
 } from '@dockdo/shared';
@@ -61,6 +61,51 @@ export async function registerTaskRoutes(app: FastifyInstance): Promise<void> {
       ? await getDb().select().from(subtasks).where(sql`${subtasks.taskId} IN (${sql.join(ids.map((x) => sql`${x}`), sql`, `)})`)
       : [];
     return {
+      tasks: rows.map((t) => ({
+        ...t,
+        labels: labelsForTasks.filter((l) => l.taskId === t.id).map((l) => ({ id: l.labelId, name: l.name, color: l.color })),
+        subtasks: subs.filter((s) => s.taskId === t.id)
+      }))
+    };
+  });
+
+  app.get('/api/board', async (req, reply) => {
+    if (!requireAuth(req, reply)) return;
+    const userId = req.user!.id;
+    const memberRows = await getDb().select().from(listMembers).where(eq(listMembers.userId, userId));
+    if (!memberRows.length) return { lists: [], tasks: [] };
+    const listIds = memberRows.map((m) => m.listId);
+    const inListIds = sql`${tasks.listId} IN (${sql.join(listIds.map((x) => sql`${x}`), sql`, `)})`;
+    const listRows = await getDb()
+      .select({ list: lists, memberRole: listMembers.role })
+      .from(listMembers)
+      .innerJoin(lists, eq(lists.id, listMembers.listId))
+      .where(eq(listMembers.userId, userId));
+    const rows = await getDb().select().from(tasks).where(inListIds).orderBy(tasks.sortOrder);
+    const ids = rows.map((t) => t.id);
+    const labelsForTasks = ids.length
+      ? await getDb()
+          .select({ taskId: taskLabels.taskId, labelId: taskLabels.labelId, name: labels.name, color: labels.color })
+          .from(taskLabels)
+          .innerJoin(labels, eq(labels.id, taskLabels.labelId))
+          .where(sql`${taskLabels.taskId} IN (${sql.join(ids.map((x) => sql`${x}`), sql`, `)})`)
+      : [];
+    const subs = ids.length
+      ? await getDb().select().from(subtasks).where(sql`${subtasks.taskId} IN (${sql.join(ids.map((x) => sql`${x}`), sql`, `)})`)
+      : [];
+    const assigneeIds = [...new Set(rows.map((t) => t.assigneeId).filter((x): x is string => !!x))];
+    const assignees = assigneeIds.length
+      ? await getDb().select({ id: users.id, name: users.name }).from(users)
+          .where(sql`${users.id} IN (${sql.join(assigneeIds.map((x) => sql`${x}`), sql`, `)})`)
+      : [];
+    return {
+      lists: listRows.map((r) => ({
+        id: r.list.id,
+        name: r.list.name,
+        color: r.list.color,
+        memberRole: r.memberRole as 'owner' | 'editor' | 'viewer'
+      })),
+      assignees,
       tasks: rows.map((t) => ({
         ...t,
         labels: labelsForTasks.filter((l) => l.taskId === t.id).map((l) => ({ id: l.labelId, name: l.name, color: l.color })),
