@@ -4,7 +4,7 @@ import {
   type DragStartEvent, type DragOverEvent, type DragEndEvent
 } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { Calendar, Flag, Tag, Search, ListTodo } from 'lucide-react';
+import { Calendar, Flag, Tag, Search, ListTodo, CheckCircle2 } from 'lucide-react';
 import { api } from '../api';
 import { wsClient } from '../ws';
 import { useStore } from '../store';
@@ -25,12 +25,28 @@ interface Assignee {
 
 type ColumnStatus = 'todo' | 'in_progress' | 'deferred' | 'done';
 
-const COLUMNS: { id: ColumnStatus; title: string; hint: string; color: string }[] = [
-  { id: 'todo', title: 'Aufgabenpool', hint: 'Noch keinem Status zugeordnet', color: 'var(--c-primary)' },
-  { id: 'in_progress', title: 'In Bearbeitung', hint: 'Aktuell laufend', color: 'var(--c-accent)' },
-  { id: 'deferred', title: 'Verschoben / Frist gesetzt', hint: 'Zurückgestellt oder neue Frist', color: 'var(--c-warning)' },
-  { id: 'done', title: 'Erledigt', hint: 'Abgeschlossen', color: 'var(--c-success)' }
+const LIST_PALETTE = ['#38bdf8', '#a78bfa', '#34d399', '#fbbf24', '#fb7185', '#60a5fa', '#2dd4bf', '#f472b6', '#a3e635', '#fdba74'];
+
+function listAccentColor(id: string): string {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return LIST_PALETTE[h % LIST_PALETTE.length];
+}
+
+const COLUMNS: { id: ColumnStatus; title: string; hint: string; dot: string; tint: string; chipText: string; badge: string }[] = [
+  { id: 'todo', title: 'Aufgabenpool', hint: 'Noch keinem Status zugeordnet', dot: '#60a5fa', tint: 'bg-blue-500/5', chipText: 'text-blue-400', badge: 'text-blue-300' },
+  { id: 'in_progress', title: 'In Bearbeitung', hint: 'Aktuell laufend', dot: '#fbbf24', tint: 'bg-amber-500/5', chipText: 'text-amber-400', badge: 'text-amber-300' },
+  { id: 'deferred', title: 'Verschoben / Frist gesetzt', hint: 'Zurückgestellt oder neue Frist', dot: '#a78bfa', tint: 'bg-violet-500/5', chipText: 'text-violet-400', badge: 'text-violet-300' },
+  { id: 'done', title: 'Erledigt', hint: 'Abgeschlossen', dot: '#34d399', tint: 'bg-emerald-500/5', chipText: 'text-emerald-400', badge: 'text-emerald-300' }
 ];
+
+const PRIORITY_CHIP: Record<string, string> = {
+  high: 'bg-red-500/10 text-red-400',
+  medium: 'bg-amber-500/10 text-amber-400',
+  low: 'bg-emerald-500/10 text-emerald-400'
+};
+
+const PRIORITY_LABEL: Record<string, string> = { high: 'Hoch', medium: 'Mittel', low: 'Niedrig' };
 
 export function KanbanPage() {
   const { user, updateTask, deleteTask } = useStore();
@@ -52,7 +68,7 @@ export function KanbanPage() {
 
   interface BoardTask extends TaskDto {
     listName: string;
-    listColor: string | null;
+    listAccent: string;
   }
 
   const [boardTasks, setBoardTasks] = useState<BoardTask[]>([]);
@@ -63,11 +79,14 @@ export function KanbanPage() {
       setLists(data.lists || []);
       setAssignees(data.assignees || []);
       const byId = new Map((data.lists || []).map((l) => [l.id, l]));
-      setBoardTasks((data.tasks || []).map((t) => ({
-        ...t,
-        listName: byId.get(t.listId)?.name || '',
-        listColor: byId.get(t.listId)?.color || null
-      })));
+      setBoardTasks((data.tasks || []).map((t) => {
+        const list = byId.get(t.listId);
+        return {
+          ...t,
+          listName: list?.name || '',
+          listAccent: list?.color || listAccentColor(t.listId)
+        };
+      }));
       for (const l of data.lists || []) wsClient.subscribe(l.id);
     } catch {
       /* ignore */
@@ -140,9 +159,17 @@ export function KanbanPage() {
     moveTaskLocally(activeId, overCol);
   };
 
+  const revertDrag = () => {
+    if (dragStartRef.current) moveTaskLocally(dragStartRef.current.id, dragStartRef.current.from);
+    dragStartRef.current = null;
+  };
+
   const handleDragEnd = async (e: DragEndEvent) => {
     const { active, over } = e;
-    if (!over) return;
+    if (!over) {
+      revertDrag();
+      return;
+    }
     const activeId = String(active.id);
     const from = dragStartRef.current?.from || findColumn(activeId);
     dragStartRef.current = null;
@@ -161,7 +188,8 @@ export function KanbanPage() {
 
   const persistStatus = async (task: TaskDto, status: ColumnStatus) => {
     try {
-      await updateTask(task.id, { status });
+      const updated = await updateTask(task.id, { status });
+      if (updated) setBoardTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, ...updated } : t)));
     } catch {
       await load();
     }
@@ -173,7 +201,8 @@ export function KanbanPage() {
     setBusy(true);
     try {
       const dueDate = dueValue ? new Date(dueValue).toISOString() : null;
-      await updateTask(task.id, { status: 'deferred', dueDate });
+      const updated = await updateTask(task.id, { status: 'deferred', dueDate });
+      if (updated) setBoardTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, ...updated } : t)));
       setPendingDeferred(null);
     } catch {
       moveTaskLocally(task.id, pendingDeferred.from);
@@ -215,21 +244,21 @@ export function KanbanPage() {
         <span className="text-sm text-muted">Alle Aufgaben aus deinen Listen</span>
       </header>
 
-      <div className="card mb-4 grid gap-3 p-3 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="relative">
+      <div className="card mb-4 grid grid-cols-1 gap-2 p-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="relative min-w-0">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
           <input className="input pl-9" placeholder="Suchen…" value={query} onChange={(e) => setQuery(e.target.value)} />
         </div>
-        <select className="input" value={listFilter} onChange={(e) => setListFilter(e.target.value)}>
+        <select className="input min-w-0" value={listFilter} onChange={(e) => setListFilter(e.target.value)}>
           <option value="">Alle Listen</option>
           {lists.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
         </select>
-        <select className="input" value={assigneeFilter} onChange={(e) => setAssigneeFilter(e.target.value)}>
+        <select className="input min-w-0" value={assigneeFilter} onChange={(e) => setAssigneeFilter(e.target.value)}>
           <option value="">Alle Personen</option>
           <option value="me">Mir zugewiesen</option>
           {assignees.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
         </select>
-        <select className="input" value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)}>
+        <select className="input min-w-0" value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)}>
           <option value="">Alle Prioritäten</option>
           <option value="low">Niedrig</option>
           <option value="medium">Mittel</option>
@@ -240,7 +269,13 @@ export function KanbanPage() {
       {loading ? (
         <div className="card p-10 text-center text-sm text-muted">Lade Board…</div>
       ) : (
-        <DndContext sensors={sensors} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={(e) => void handleDragEnd(e)}>
+        <DndContext
+          sensors={sensors}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={(e) => void handleDragEnd(e)}
+          onDragCancel={revertDrag}
+        >
           <div className="flex gap-4 overflow-x-auto pb-2 lg:grid lg:grid-cols-4">
             {COLUMNS.map((col) => (
               <Column
@@ -287,7 +322,7 @@ export function KanbanPage() {
 }
 
 function Column({ col, items, onOpen, onToggleDone }: {
-  col: { id: ColumnStatus; title: string; hint: string; color: string };
+  col: { id: ColumnStatus; title: string; hint: string; dot: string; tint: string; chipText: string; badge: string };
   items: TaskDto[];
   onOpen: (t: TaskDto) => void;
   onToggleDone: (t: TaskDto) => void;
@@ -296,17 +331,19 @@ function Column({ col, items, onOpen, onToggleDone }: {
   return (
     <div
       ref={setNodeRef}
-      className={`flex w-[min(92vw,320px)] shrink-0 flex-col rounded-theme border border-line bg-surface/60 transition-colors lg:w-auto lg:shrink ${isOver ? 'ring-2 ring-[var(--c-primary)]/40' : ''}`}
+      className={`flex w-[min(88vw,320px)] shrink-0 flex-col rounded-theme border border-line bg-surface/60 transition-colors lg:w-auto lg:flex-1 lg:shrink ${isOver ? 'ring-2 ring-[var(--c-primary)]/40' : ''}`}
       style={{ minHeight: 160 }}
     >
-      <div className="flex items-center gap-2 border-b border-line px-3 py-2.5">
-        <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: col.color }} />
+      <div className={`flex items-center gap-2 border-b border-line px-3 py-3 ${col.tint}`}>
+        <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: col.dot }} />
         <h2 className="truncate text-sm font-bold">{col.title}</h2>
-        <span className="ml-auto shrink-0 rounded-full bg-bg px-2 py-0.5 text-xs font-semibold text-muted">{items.length}</span>
+        <span className={`ml-auto shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${col.badge}`}>{items.length}</span>
       </div>
       <div className="flex-1 space-y-2 overflow-y-auto p-2">
         {items.length === 0 ? (
-          <div className="rounded-theme border border-dashed border-line p-4 text-center text-xs text-muted">{col.hint}</div>
+          <div className="flex min-h-[76px] items-center justify-center rounded-theme border border-dashed border-line p-3 text-center text-xs text-muted">
+            {col.hint}
+          </div>
         ) : (
           items.map((t) => (
             <KanbanCard key={t.id} task={t} onOpen={() => onOpen(t)} onToggleDone={() => onToggleDone(t)} />
@@ -317,31 +354,36 @@ function Column({ col, items, onOpen, onToggleDone }: {
   );
 }
 
-function KanbanCard({ task, onOpen, onToggleDone }: { task: TaskDto & { listName: string; listColor: string | null }; onOpen: () => void; onToggleDone: () => void }) {
+function KanbanCard({ task, onOpen, onToggleDone }: { task: TaskDto & { listName: string; listAccent: string }; onOpen: () => void; onToggleDone: () => void }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: task.id, data: { status: task.status } });
-  const overdue = task.dueDate && task.status !== 'done' && new Date(task.dueDate).getTime() < Date.now();
-  const today = task.dueDate && task.status !== 'done' && new Date(task.dueDate).toDateString() === new Date().toDateString();
+  const done = task.status === 'done';
+  const overdue = task.dueDate && !done && new Date(task.dueDate).getTime() < Date.now();
+  const today = task.dueDate && !done && new Date(task.dueDate).toDateString() === new Date().toDateString();
 
   return (
     <div
       ref={setNodeRef}
-      style={{ transform: CSS.Translate.toString(transform), opacity: isDragging ? 0.5 : 1 }}
-      className={`card group cursor-pointer select-none p-3 ${task.status === 'done' ? 'opacity-60' : ''}`}
+      style={{ transform: CSS.Translate.toString(transform), borderLeft: `3px solid ${done ? 'rgba(148,163,184,0.4)' : task.listAccent}` }}
+      {...attributes}
+      {...listeners}
+      className={`card group min-h-[76px] cursor-grab select-none p-3 active:cursor-grabbing ${done ? 'opacity-60 saturate-50' : ''} ${isDragging ? 'opacity-40 ring-2 ring-[var(--c-primary)]/50' : ''}`}
       onClick={onOpen}
     >
-      <div {...attributes} {...listeners} className="mb-1 flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted">
-        <span className="h-1.5 w-1.5 rounded-full" style={{ background: task.listColor || 'var(--c-primary)' }} />
+      <div className="mb-1 flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted">
+        {done ? (
+          <CheckCircle2 className="h-3 w-3 shrink-0 text-emerald-400/80" />
+        ) : (
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: task.listAccent }} />
+        )}
         <span className="truncate">{task.listName}</span>
       </div>
-      <div className={`truncate text-sm font-medium ${task.status === 'done' ? 'line-through' : ''}`}>{task.title}</div>
+      <div className={`truncate text-sm font-medium ${done ? 'line-through text-muted' : ''}`}>{task.title}</div>
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
-        {task.priority !== 'medium' && (
-          <span className={`chip ${task.priority === 'high' ? 'bg-danger/10 text-danger' : 'bg-warn/10 text-warn'}`}>
-            <Flag className="h-3 w-3" /> {task.priority === 'high' ? 'Hoch' : 'Niedrig'}
-          </span>
-        )}
+        <span className={`chip ${PRIORITY_CHIP[task.priority] || PRIORITY_CHIP.medium}`}>
+          <Flag className="h-3 w-3" /> {PRIORITY_LABEL[task.priority] || 'Mittel'}
+        </span>
         {task.dueDate && (
-          <span className={`chip ${overdue ? 'bg-danger/10 text-danger' : today ? 'bg-warn/10 text-warn' : 'bg-line/50 text-muted'}`}>
+          <span className={`chip ${overdue ? 'bg-red-500/10 text-red-400' : today ? 'bg-amber-500/10 text-amber-400' : 'bg-line/50 text-muted'}`}>
             <Calendar className="h-3 w-3" /> {new Date(task.dueDate).toLocaleDateString('de-DE')} {overdue ? '· überfällig' : ''}
           </span>
         )}
@@ -355,7 +397,7 @@ function KanbanCard({ task, onOpen, onToggleDone }: { task: TaskDto & { listName
             {task.subtasks.filter((s) => s.done).length}/{task.subtasks.length}
           </span>
         )}
-        {task.status !== 'done' && (
+        {!done && (
           <button
             className="ml-auto rounded-theme p-1 text-muted transition-colors hover:bg-line hover:text-ink"
             title="Als erledigt markieren"
